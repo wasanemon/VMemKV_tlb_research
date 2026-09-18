@@ -45,6 +45,53 @@ TEST_CASE("T2FlatFile: append_default then at() round-trips key/value") {
   CHECK(span_to_string(record.value) == "world");
 }
 
+TEST_CASE("T2FlatFile: append_default keeps one-page records within a single page") {
+  TempT2File t2;
+  auto mem = t2.file.get_memory();
+  constexpr size_t kRecords = 64;
+  constexpr size_t kValueBytes = 1024;
+  std::vector<uint64_t> offsets;
+  offsets.reserve(kRecords);
+  for (size_t i = 0; i < kRecords; ++i) {
+    const std::string key = "k" + std::to_string(i);
+    const std::string value(kValueBytes, static_cast<char>('a' + (i % 26)));
+    offsets.push_back(t2.file.append_default(mem, as_span(bytes_of(key)), as_span(bytes_of(value))));
+  }
+  size_t page_aligned = 0;
+  for (size_t i = 0; i < kRecords; ++i) {
+    const std::string key = "k" + std::to_string(i);
+    const uint64_t aligned_len = vmemkv::record_aligned_len(sizeof(ValueRecordHeader), key.size(), kValueBytes);
+    REQUIRE(aligned_len <= 4096);
+    CHECK((offsets[i] % 4096) + aligned_len <= 4096);
+    if (offsets[i] % 4096 == 0 && i > 0) {
+      ++page_aligned;
+    }
+    const std::string expected(kValueBytes, static_cast<char>('a' + (i % 26)));
+    CHECK(span_to_string(t2.file.at(offsets[i], mem).value) == expected);
+  }
+  // Crossing page boundaries must actually exercise the skip path.
+  CHECK(page_aligned > 0);
+}
+
+TEST_CASE("T2FlatFile: append_default page-aligns multi-page records") {
+  TempT2File t2;
+  auto mem = t2.file.get_memory();
+  // Misalign the frontier first so alignment is observable, not incidental.
+  t2.file.append_default(mem, as_span(bytes_of("pad")), as_span(bytes_of("x")));
+  const std::string big_value(65536, 'z');
+  const uint64_t offset = t2.file.append_default(mem, as_span(bytes_of("big")), as_span(bytes_of(big_value)));
+  CHECK(offset % 4096 == 0);
+  CHECK(span_to_string(t2.file.at(offset, mem).value) == big_value);
+}
+
+TEST_CASE("T2FlatFile: append_default over capacity throws without consuming bytes") {
+  TempT2File t2;
+  auto mem = t2.file.get_memory();
+  const std::string huge_value(5 * 1024 * 1024, 'q');
+  CHECK_THROWS(t2.file.append_default(mem, as_span(bytes_of("huge")), as_span(bytes_of(huge_value))));
+  CHECK(t2.file.bytes_used() == 0);
+}
+
 TEST_CASE("T2FlatFile: update_value_at overwrites in place when the new value fits alloc_len") {
   TempT2File t2;
   auto mem = t2.file.get_memory();

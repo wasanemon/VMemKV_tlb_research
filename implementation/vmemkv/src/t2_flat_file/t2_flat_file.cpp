@@ -18,6 +18,26 @@ namespace vmemkv {
 
 namespace {
 
+// Page granularity of the fault-driven read path: one cold Get faults whole pages,
+// so a record's placement decides how many discrete disk I/Os that Get costs.
+constexpr uint64_t kPageBytes = 4096;
+
+// Gap before `frontier` so a record of `required` bytes faults the minimum page
+// count: a record of one page or less never straddles a boundary; a larger record
+// starts page-aligned and touches exactly ceil(len/page) pages instead of one more.
+// Skipped gaps hold no record and are never reused (bytes_used only grows), so they
+// stay zero-filled sparse holes the punch path already treats as hollow.
+uint64_t page_skip_bytes(uint64_t frontier, uint64_t required) noexcept {
+  const uint64_t misalignment = frontier % kPageBytes;
+  if (misalignment == 0) {
+    return 0;
+  }
+  if (required <= kPageBytes) {
+    return (misalignment + required > kPageBytes) ? (kPageBytes - misalignment) : 0;
+  }
+  return kPageBytes - misalignment;
+}
+
 // Writes a ValueRecordHeader followed by key, value, and zero padding out to the next 8-byte
 // boundary at `record_base`.
 void write_record(std::byte *record_base, std::span<const std::byte> key, std::span<const std::byte> value) noexcept {
@@ -79,19 +99,24 @@ auto T2FlatFile::append_default(const T2Memory *mem,
                                 std::span<const std::byte> key,
                                 std::span<const std::byte> value) -> uint64_t {
   // Align all record sizes to 8 bytes. This avoids unaligned memory access penalties
-  // on modern CPU architectures and allows callers to cast fields safely.
+  // on modern CPU architectures and allows callers to cast fields safely. Placement
+  // additionally keeps each record's page span minimal (see page_skip_bytes); the
+  // reservation is a CAS loop so concurrent appenders serialize on one atomic.
   const uint64_t required = vmemkv::record_aligned_len(sizeof(ValueRecordHeader), key.size(), value.size());
 
-  const uint64_t offset = mem->bytes_used.fetch_add(required, std::memory_order_relaxed);
-
-  if (offset + required > mem->capacity) {
-    throw std::runtime_error("T2 storage capacity exceeded");
+  uint64_t frontier = mem->bytes_used.load(std::memory_order_relaxed);
+  while (true) {
+    const uint64_t skip = page_skip_bytes(frontier, required);
+    if (frontier + skip + required > mem->capacity) {
+      throw std::runtime_error("T2 storage capacity exceeded");
+    }
+    if (mem->bytes_used.compare_exchange_weak(frontier, frontier + skip + required, std::memory_order_relaxed)) {
+      const uint64_t offset = frontier + skip;
+      std::byte *record_base = mem->base + offset;
+      write_record(record_base, key, value);
+      return offset;
+    }
   }
-
-  std::byte *record_base = mem->base + offset;
-  write_record(record_base, key, value);
-
-  return offset;
 }
 
 auto T2FlatFile::update_value_at(uint64_t payload,
