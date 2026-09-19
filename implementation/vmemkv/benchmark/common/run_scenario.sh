@@ -27,6 +27,10 @@ export VMEMKV_CONTEXT_cpu_model="$(vmemkv_cpu_model)"
 export VMEMKV_CONTEXT_cpu_count="$(nproc --all)"
 export VMEMKV_CONTEXT_mem_total_bytes="$(vmemkv_mem_total_bytes)"
 export VMEMKV_CONTEXT_swap_total_bytes="$(vmemkv_swap_total_bytes)"
+# Paging regime this run was measured under (MGLRU generations on recent kernels,
+# classic LRU otherwise). Read-only observability: never enforced here, so this
+# cannot change behavior. Unknown where the sysfs knob is absent.
+export VMEMKV_CONTEXT_lru_gen_enabled="$(cat /sys/kernel/mm/lru_gen/enabled 2>/dev/null || echo unknown)"
 
 # Run bench_kv with unbuffered stdout to prevent lag in systemd-run/SSH pipes.
 exec "$BENCH_KV_BIN" \

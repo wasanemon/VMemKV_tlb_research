@@ -495,6 +495,7 @@ static void register_benchmark_context() {
   add_custom_context_from_env("mem_total_bytes", "VMEMKV_CONTEXT_mem_total_bytes");
   add_custom_context_from_env("cgroup_memory_limit_bytes", "VMEMKV_CONTEXT_cgroup_memory_limit_bytes");
   add_custom_context_from_env("swap_total_bytes", "VMEMKV_CONTEXT_swap_total_bytes");
+  add_custom_context_from_env("lru_gen_enabled", "VMEMKV_CONTEXT_lru_gen_enabled");
   add_custom_context_from_env("instance_type", "VMEMKV_CONTEXT_instance_type");
   add_custom_context_from_env("aws_region", "VMEMKV_CONTEXT_aws_region");
   add_custom_context_from_env("memo", "VMEMKV_CONTEXT_memo");
