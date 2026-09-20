@@ -426,6 +426,44 @@
   </div>
 </td>
 </tr>
+<tr class="hover:bg-indigo-50/10 transition-colors"><td class="py-3.5 px-4 font-bold text-slate-800 bg-slate-50/20">YCSB-E</td>
+<td class="py-3.5 px-4 transition-colors">
+  <div class="flex flex-col gap-0.5">
+    <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] border bg-emerald-600 text-white border-transparent shadow-sm font-bold  w-fit">
+      ✅ WIN (3.32x)
+    </span>
+    <span class="text-[11px] text-slate-500 font-medium">vmemkv (+Inline)</span>
+    <span class="text-[10px] text-slate-400">vs RocksDB-BlobDB</span>
+  </div>
+</td>
+<td class="py-3.5 px-4 transition-colors">
+  <div class="flex flex-col gap-0.5">
+    <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] border bg-emerald-600 text-white border-transparent shadow-sm font-bold  w-fit">
+      ✅ WIN (1.67x)
+    </span>
+    <span class="text-[11px] text-slate-500 font-medium">vmemkv (+Inline)</span>
+    <span class="text-[10px] text-slate-400">vs RocksDB</span>
+  </div>
+</td>
+<td class="py-3.5 px-4 transition-colors">
+  <div class="flex flex-col gap-0.5">
+    <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] border bg-emerald-600 text-white border-transparent shadow-sm font-bold  w-fit">
+      ✅ WIN (1.27x)
+    </span>
+    <span class="text-[11px] text-slate-500 font-medium">vmemkv (Baseline)</span>
+    <span class="text-[10px] text-slate-400">vs RocksDB</span>
+  </div>
+</td>
+<td class="py-3.5 px-4 transition-colors">
+  <div class="flex flex-col gap-0.5">
+    <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] border bg-rose-50 text-rose-700 border-rose-200 font-bold  w-fit">
+      LOSE (0.88x)
+    </span>
+    <span class="text-[11px] text-slate-500 font-medium">vmemkv (+PinSeq)</span>
+    <span class="text-[10px] text-slate-400">vs RocksDB</span>
+  </div>
+</td>
+</tr>
 </tbody>
           </table>
         </div>
@@ -1304,6 +1342,50 @@
         30135.02976714617
       ]
     },
+    "YCSB_E": {
+      "RocksDB": [
+        null,
+        null,
+        null,
+        501657.5013776171
+      ],
+      "Baseline": [
+        null,
+        null,
+        null,
+        1489536.7189661448
+      ],
+      "+BF": [
+        null,
+        null,
+        null,
+        1489798.22205599
+      ],
+      "+Inline": [
+        null,
+        null,
+        null,
+        1673571.1498687845
+      ],
+      "RocksDB-BlobDB": [
+        null,
+        null,
+        null,
+        504257.1799455471
+      ],
+      "LMDB": [
+        null,
+        null,
+        null,
+        125967.10278872769
+      ],
+      "LeanStore": [
+        null,
+        null,
+        null,
+        136341.789335553
+      ]
+    },
     "Delete": {
       "RocksDB": [
         9202.802651418828,
@@ -1656,6 +1738,50 @@
         15718.483775240358,
         27861.166661733663,
         33612.92410193386
+      ]
+    },
+    "YCSB_E": {
+      "RocksDB": [
+        null,
+        null,
+        null,
+        129613.45445312039
+      ],
+      "Baseline": [
+        null,
+        null,
+        null,
+        214389.17016858014
+      ],
+      "+BF": [
+        null,
+        null,
+        null,
+        214635.43501057712
+      ],
+      "+Inline": [
+        null,
+        null,
+        null,
+        216384.93932281167
+      ],
+      "RocksDB-BlobDB": [
+        null,
+        null,
+        null,
+        20756.18724641707
+      ],
+      "LMDB": [
+        null,
+        null,
+        null,
+        75001.53581272028
+      ],
+      "LeanStore": [
+        null,
+        null,
+        null,
+        23356.649365613855
       ]
     },
     "Delete": {
@@ -2070,6 +2196,62 @@
         12597.500405960818,
         56032.686622829,
         93576.7626852762
+      ]
+    },
+    "YCSB_E": {
+      "LMDB": [
+        null,
+        null,
+        null,
+        31170.18641976862
+      ],
+      "RocksDB-BlobDB": [
+        null,
+        null,
+        null,
+        21231.66094376715
+      ],
+      "RocksDB": [
+        null,
+        null,
+        null,
+        70807.24368726365
+      ],
+      "LeanStore": [
+        null,
+        null,
+        null,
+        2644.856351897888
+      ],
+      "+BF": [
+        null,
+        null,
+        null,
+        89620.07377371057
+      ],
+      "Baseline": [
+        null,
+        null,
+        null,
+        89984.54405967426
+      ],
+      "+Inline": [
+        null,
+        null,
+        null,
+        89929.4119821555
+      ],
+      "+PinSeq": [
+        null,
+        null,
+        null,
+        85947.93228130619
+      ],
+      "+PinRandom": [
+        null,
+        null,
+        null,
+        27655.717993023627
       ]
     },
     "Delete": {
@@ -2490,6 +2672,56 @@
         3284.653811769427,
         6623.481966190234,
         9667.365118425952
+      ]
+    },
+    "YCSB_E": {
+      "LMDB": [
+        null,
+        null,
+        null,
+        2338.2413056955734
+      ],
+      "RocksDB-BlobDB": [
+        null,
+        null,
+        null,
+        2001.611820426787
+      ],
+      "RocksDB": [
+        null,
+        null,
+        null,
+        2483.192893995688
+      ],
+      "+BF": [
+        null,
+        null,
+        null,
+        2002.4439327079579
+      ],
+      "Baseline": [
+        null,
+        null,
+        null,
+        2047.752001605657
+      ],
+      "+Inline": [
+        null,
+        null,
+        null,
+        1912.1699346535624
+      ],
+      "+PinSeq": [
+        null,
+        null,
+        null,
+        2175.28048416977
+      ],
+      "+PinRandom": [
+        null,
+        null,
+        null,
+        559.9677268759076
       ]
     },
     "Delete": {
@@ -6502,7 +6734,7 @@
     ]
   }
 };
-    const workloads = ["Insert", "Update", "Delete", "Get_Miss", "Get_Hit_Zipf", "Get_Hit_Uniform", "Scan_Zipf", "Scan_Uniform"];
+    const workloads = ["Insert", "Update", "Delete", "Get_Miss", "Get_Hit_Zipf", "Get_Hit_Uniform", "Scan_Zipf", "Scan_Uniform", "YCSB_E"];
     const valSizes  = ["8B_In-Memory", "1KB_In-Memory", "1KB_LTM", "64KB_LTM"];
 
     const colors = {"RocksDB": "#64748b", "LMDB": "#10b981", "RocksDB-BlobDB": "#a855f7", "LeanStore": "#0d9488", "Baseline": "#94a3b8", "+BF": "#f59e0b", "+Inline": "#6366f1", "+PinRandom": "#0ea5e9", "+PinSeq": "#84cc16"};

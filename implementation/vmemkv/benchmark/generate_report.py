@@ -57,7 +57,8 @@ VARIANT_DESCRIPTIONS = [
     ("+PinRandom", "+Inline のread policyをrandom-access mappingへピン留め (trifecta ablation)"),
     ("+PinSeq", "+Inline のread policyをsequential mappingへピン留め (trifecta ablation)"),
 ]
-WORKLOADS = ["Insert", "Update", "Delete", "Get_Miss", "Get_Hit_Zipf", "Get_Hit_Uniform", "Scan_Zipf", "Scan_Uniform"]
+WORKLOADS = ["Insert", "Update", "Delete", "Get_Miss", "Get_Hit_Zipf", "Get_Hit_Uniform", "Scan_Zipf", "Scan_Uniform",
+             "YCSB_E"]
 THREADS = [1, 4, 16, 32]
 
 SCENARIO_LABELS = {
@@ -104,6 +105,8 @@ def parse_bench_name(name):
             workload = "Scan_Zipf"
         elif dist == "Uniform":
             workload = "Scan_Uniform"
+    elif op == "YCSB-E":
+        workload = "YCSB_E"
     return store, variant, workload, threads
 
 
@@ -406,6 +409,7 @@ def render_winners_matrix_html(rows):
         "Insert": "Insert", "Update": "Update (Zipf)", "Delete": "Delete",
         "Get_Miss": "Get (Miss)", "Get_Hit_Zipf": "Get (Hit, Zipf)", "Get_Hit_Uniform": "Get (Hit, Uniform)",
         "Scan_Zipf": "Scan (Zipf)", "Scan_Uniform": "Scan (Uniform)",
+        "YCSB_E": "YCSB-E",
     }
     out = []
     for workload, cells in rows:
@@ -563,6 +567,12 @@ def main():
         "const timelineData = " + json.dumps(timeline_data, indent=2) + ";\n    " +
         "const forcedEventsData = " + json.dumps(forced_events_data, indent=2) + ";\n    "
     )
+    # Detail charts iterate this template-static list: keep it in sync with WORKLOADS so
+    # newly covered workloads (e.g. YCSB_E aggregates) render without template edits.
+    html, n_workloads = re.subn(r"const workloads = \[[^\]]*\];",
+                                lambda m: "const workloads = " + json.dumps(WORKLOADS) + ";", html, count=1)
+    if n_workloads == 0:
+        raise ValueError("template lacks expected JS const: workloads")
 
     # Header title / links / description. Regex-based (not an exact previous-string match): the
     # template chain mutates its own <title>/<h1> text on every generation (each report's own
