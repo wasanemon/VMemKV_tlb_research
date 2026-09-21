@@ -605,6 +605,14 @@ ssh_tee_logs() {
 # (see implementation/docs/benchmark/20260920_mglru_safety_matrix.md). Per-cell
 # isolation removes both confounds; repetitions within one cell still share its scope
 # (correlated error bars -- documented, not fixed here).
+# Split paging regime: VMemKV groups run with MGLRU disabled (the recommended
+# deployment -- boot knob, no code change) and rival groups with the distro default
+# (MGLRU on); in-memory scenarios are untouched (no eviction pressure, regime idle).
+# Groups run rivals-first so no rival ever follows a knob toggle (freshly re-enabled
+# MGLRU generations need no warmup assumption on our side, and classic LRU keeps
+# none). Toggle state is tracked so a full run flips at most twice; mixed runs annotate
+# the merged context memo. See
+# implementation/docs/benchmark/20260920_split_condition_publication.md.
 # Discovers exact benchmark names remotely and runs each as its own anchored filter
 # (never a re-derived Value=/Op= regex), so this stays correct under every filter
 # shape (plain combo, --quick, --scenario/--value-size limits, YCSB_ONLY).
@@ -638,9 +646,41 @@ run_ltm_isolated_groups() {
   fi
   echo "[runner] ${#identities[@]} isolation groups (one per cell)"
 
-  local -a group_result_paths=()
-  local group_idx=0 identity group_names group_filter group_result_path group_remote_cmd group_remote_cmd_quoted group_status
+  # Split paging regime: VMemKV cells run with classic LRU (MGLRU disabled, the
+  # recommended deployment -- no code change), rival cells with the distro default
+  # (MGLRU on). Rivals first so no rival ever runs on freshly re-enabled,
+  # still-cold MGLRU generations; VMemKV's classic path has no such warmup state.
+  # The knob is machine-global, so order the groups to toggle at most once.
+  local -a ordered_identities=()
+  local -a vmemkv_identities=()
   for identity in "${identities[@]}"; do
+    if [[ "$identity" == Store=VMemKV/* ]]; then
+      vmemkv_identities+=("$identity")
+    else
+      ordered_identities+=("$identity")
+    fi
+  done
+  ordered_identities+=("${vmemkv_identities[@]}")
+
+  # Current knob state, read once (distro default is on; verified on every box used
+  # so far, but never assume it here). Kernels without the knob run ambient.
+  local mg_state mg_has_knob=true
+  mg_state="$(ssh $SSH_OPTS "ubuntu@$PUBLIC_IP" "cat /sys/kernel/mm/lru_gen/enabled 2>/dev/null || echo unknown")"
+  if [[ "$mg_state" == "unknown" ]]; then
+    echo "[runner] no lru_gen knob on this kernel -- running ambient, no split" >&2
+    mg_has_knob=false
+    mg_state="on"
+  elif [[ "$mg_state" == "0x0000" ]]; then
+    mg_state="off"
+  else
+    mg_state="on"
+  fi
+  echo "[runner] MGLRU initial state: $mg_state"
+  local saw_vmemkv=false saw_rival=false
+
+  local -a group_result_paths=()
+  local group_idx=0 identity group_names group_filter group_result_path group_remote_cmd group_remote_cmd_quoted group_status want_off
+  for identity in "${ordered_identities[@]}"; do
     group_idx=$((group_idx + 1))
     group_names="$(printf '%s\n' "$identity" | sed -E 's/[][(){}.^$*+?\\|]/\\&/g')"
     group_filter="^(${group_names})\$"
@@ -648,6 +688,24 @@ run_ltm_isolated_groups() {
     group_result_paths+=("$group_result_path")
 
     echo "[runner] LTM ${label} ${group_idx}/${#identities[@]}: ${identity}"
+    if [[ "$identity" == Store=VMemKV/* ]]; then
+      want_off=true
+      saw_vmemkv=true
+    else
+      want_off=false
+      saw_rival=true
+    fi
+    if [[ "$mg_has_knob" == true && "$want_off" == true && "$mg_state" != "off" ]]; then
+      echo "[runner] MGLRU off for VMemKV cells"
+      ssh $SSH_OPTS "ubuntu@$PUBLIC_IP" "echo n | sudo tee /sys/kernel/mm/lru_gen/enabled >/dev/null && cat /sys/kernel/mm/lru_gen/enabled" \
+        >>"$stdout_log" 2>>"$stderr_log"
+      mg_state="off"
+    elif [[ "$mg_has_knob" == true && "$want_off" == false && "$mg_state" != "on" ]]; then
+      echo "[runner] MGLRU on for rival cells"
+      ssh $SSH_OPTS "ubuntu@$PUBLIC_IP" "echo y | sudo tee /sys/kernel/mm/lru_gen/enabled >/dev/null && cat /sys/kernel/mm/lru_gen/enabled" \
+        >>"$stdout_log" 2>>"$stderr_log"
+      mg_state="on"
+    fi
     ssh $SSH_OPTS "ubuntu@$PUBLIC_IP" "sync && echo 3 | sudo tee /proc/sys/vm/drop_caches >/dev/null" \
       >>"$stdout_log" 2>>"$stderr_log"
 
@@ -681,6 +739,16 @@ ${LTM_PASS_YPOP_PREFIX:+${LTM_PASS_YPOP_PREFIX} }\
   ssh $SSH_OPTS "ubuntu@$PUBLIC_IP" \
     "jq -s '{context: .[0].context, benchmarks: (map(.benchmarks) | add)}'${merge_paths_quoted} > $(printf '%q' "$merge_dest")" \
     >>"$stdout_log" 2>>"$stderr_log"
+  if [[ "$mg_has_knob" == true && "$saw_vmemkv" == true && "$saw_rival" == true ]]; then
+    ssh $SSH_OPTS "ubuntu@$PUBLIC_IP" \
+      "jq '.context.memo = ((.context.memo // \"\") + \" [split-MGLRU: VMemKV cells classic-LRU, rival cells MGLRU-on]\")' $(printf '%q' "$merge_dest") > $(printf '%q' "${merge_dest}.tmp") && mv $(printf '%q' "${merge_dest}.tmp") $(printf '%q' "$merge_dest")" \
+      >>"$stdout_log" 2>>"$stderr_log"
+  fi
+  if [[ "$mg_has_knob" == true && "$mg_state" == "off" ]]; then
+    echo "[runner] restoring MGLRU on for subsequent steps"
+    ssh $SSH_OPTS "ubuntu@$PUBLIC_IP" "echo y | sudo tee /sys/kernel/mm/lru_gen/enabled >/dev/null" \
+      >>"$stdout_log" 2>>"$stderr_log"
+  fi
 }
 
 run_scenario() {
