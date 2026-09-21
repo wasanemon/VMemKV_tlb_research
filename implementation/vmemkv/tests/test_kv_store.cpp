@@ -1189,6 +1189,70 @@ TEST_CASE("VMemKV: get callback never observes a torn read across a concurrent u
   });
 }
 
+// Generation-verified batched scan walk: concurrent same-size updates churn the
+// in-place-write generation, forcing fallback batches, while scans must still
+// observe only complete versions and converge exactly once writers join. Uses
+// 32-byte values so updates stay out-of-place-free (in-place, tail region) and
+// exercise the bracket; keys are reorganized into the sorted region first so scans
+// take the batched fast path rather than the append slow path.
+TEST_CASE_TEMPLATE("scan under concurrent same-size updates observes exact versions", Store, VMemKVStores) {
+  auto store = StoreFactory<Store>::make();
+  constexpr int kKeys = 32;
+  constexpr size_t kValBytes = 32;
+  auto make_value = [](uint64_t version) {
+    std::string value(kValBytes, '\0');
+    for (size_t i = 0; i < kValBytes; ++i) {
+      value[i] = static_cast<char>((version >> (8 * (i % 8))) & 0xFF);
+    }
+    return value;
+  };
+  auto decode_version = [](std::span<const std::byte> value) {
+    uint64_t version = 0;
+    for (size_t i = 0; i < sizeof(uint64_t); ++i) {
+      version |= static_cast<uint64_t>(value[i]) << (8 * i);
+    }
+    return version;
+  };
+  for (int i = 0; i < kKeys; ++i) {
+    REQUIRE(store->insert(vmemkv_test::padded_key(i, 8), make_value(0)));
+  }
+  store->reorganize();
+  std::atomic<bool> stop{false};
+  std::vector<std::thread> updaters;
+  for (int t = 0; t < 2; ++t) {
+    updaters.emplace_back([&, t] {
+      uint64_t version = 1;
+      while (!stop.load(std::memory_order_relaxed)) {
+        const int key = (t + static_cast<int>(version)) % kKeys;
+        if (store->update(vmemkv_test::padded_key(key, 8), make_value(version))) {
+          ++version;
+        }
+      }
+    });
+  }
+  for (int s = 0; s < 200; ++s) {
+    std::ignore = store->scan(
+        "k00000000", "k00000099", [&](std::span<const std::byte> key_bytes, std::span<const std::byte> value) {
+          const int index = std::stoi(vmemkv_test::span_to_string(key_bytes).substr(1));
+          REQUIRE(index >= 0);
+          REQUIRE(index < kKeys);
+          CHECK(value.size() == kValBytes);
+          CHECK(vmemkv_test::span_to_string(value) == make_value(decode_version(value)));
+        });
+  }
+  stop.store(true, std::memory_order_relaxed);
+  for (auto &th : updaters) {
+    th.join();
+  }
+  // Converged: every key reads back exactly (versions only ever increased, and the last
+  // update per key wins).
+  for (int i = 0; i < kKeys; ++i) {
+    const auto got = vmemkv_test::get_optional_bytes(store, vmemkv_test::padded_key(i, 8));
+    REQUIRE(got.has_value());
+    CHECK(got->size() == kValBytes);
+  }
+}
+
 // Free-spinning variant with no reorganize()/checkpoint() at all.
 TEST_CASE(
     "VMemKV: free-spinning update+scan survive with no reorganize/checkpoint "

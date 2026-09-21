@@ -487,6 +487,10 @@ class VMemKVImpl {
     std::vector<size_t> read_order;
     read_order.reserve(kScanBatchSize);
     std::vector<std::byte> arena;
+    // Bounds are constant across every entry this call yields: check once whether the
+    // sorted walk's prefix containment already implies full-key containment, and skip
+    // the per-entry recheck when it does (see scan_bounds_clean()).
+    const bool bounds_clean = vmemkv::scan_bounds_clean(lower_bound, upper_bound);
 
     t1_.scan(lower_bound,
              upper_bound,
@@ -501,11 +505,15 @@ class VMemKVImpl {
                    size_t size = t1_detail::decode_size(hash);
                    std::array<std::byte, t1_detail::kInlineValueByteCount> stack_value;
                    vmemkv::copy_inline_value(payload, size, stack_value.data());
-                   const std::span<const std::byte> key_view(index_key.data(), vmemkv::inline_key_len(index_key));
-                   if (!vmemkv::key_in_range(key_view, lower_bound, upper_bound)) {
-                     return;
+                   const size_t key_len = vmemkv::inline_key_len(index_key);
+                   if (!bounds_clean) {
+                     const std::span<const std::byte> key_view(index_key.data(), key_len);
+                     if (!vmemkv::key_in_range(key_view, lower_bound, upper_bound)) {
+                       return;
+                     }
                    }
-                   callback(key_view, std::span<const std::byte>(stack_value.data(), size));
+                   callback(std::span<const std::byte>(index_key.data(), key_len),
+                            std::span<const std::byte>(stack_value.data(), size));
                    ++total_count;
                    return;
                  }

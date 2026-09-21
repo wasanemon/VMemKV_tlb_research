@@ -92,6 +92,16 @@ TEST_CASE("T2FlatFile: append_default over capacity throws without consuming byt
   CHECK(t2.file.bytes_used() == 0);
 }
 
+// scan_bounds_clean() trusts the sorted walk's prefix containment on clean bounds
+// (no 0x00 in the first 16 bytes, length at most 16) and keeps the exact per-entry
+// recheck otherwise.
+TEST_CASE("scan_bounds_clean trusts clean bounds, keeps dirty ones exact") {
+  CHECK(vmemkv::scan_bounds_clean(as_span(bytes_of("k00000000")), as_span(bytes_of("k00000099"))));
+  // NOTE: std::string("ab\0") would terminate at the null; spell the length out.
+  CHECK_FALSE(vmemkv::scan_bounds_clean(as_span(bytes_of(std::string("ab\0", 3))), as_span(bytes_of("ac"))));
+  CHECK_FALSE(vmemkv::scan_bounds_clean(as_span(bytes_of("k00000000")), as_span(bytes_of("k000009990123456789"))));
+}
+
 TEST_CASE("T2FlatFile: update_value_at overwrites in place when the new value fits alloc_len") {
   TempT2File t2;
   auto mem = t2.file.get_memory();

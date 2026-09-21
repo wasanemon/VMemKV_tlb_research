@@ -293,6 +293,28 @@ inline auto key_in_range(std::span<const std::byte> key,
   return vmemkv::bytes_in_range(key, lower_bound, upper_bound);
 }
 
+// Whether both scan bounds decide range membership identically on 16-byte padded
+// prefixes and on trimmed keys: no 0x00 in the first 16 bytes and length at most 16.
+// Inlined keys are at most 16 bytes and never end in 0x00, so under clean bounds the
+// sorted walk's prefix containment implies full-key containment and the per-entry
+// recheck can be skipped. Evaluated once per scan call -- the bounds are constant
+// across all its entries.
+inline auto scan_bounds_clean(std::span<const std::byte> lower_bound,
+                              std::span<const std::byte> upper_bound) noexcept -> bool {
+  auto bound_is_clean = [](std::span<const std::byte> bound) noexcept {
+    if (bound.size() > kStoreKeyBytes) {
+      return false;
+    }
+    for (size_t i = 0; i < bound.size(); ++i) {
+      if (bound[i] == std::byte{0}) {
+        return false;
+      }
+    }
+    return true;
+  };
+  return bound_is_clean(lower_bound) && bound_is_clean(upper_bound);
+}
+
 // Lowers ShardedT1Index's maintenance soft threshold for the scan's duration, keeping append
 // regions L2-cache-sized while the scan linearly passes over them.
 template <typename T1>
