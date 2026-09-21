@@ -66,6 +66,19 @@
           </thead>
           <tbody class="divide-y divide-slate-100">
             <tr>
+              <td class="py-4 pr-4 text-slate-400">2026-09-21</td>
+              <td class="py-4 px-4 font-medium">
+                <a href="20260921_mglru_off_charts.html" class="text-indigo-600 hover:text-indigo-800 hover:underline">
+                  AWS i4i x5 split-MGLRU (09/21, full matrix)
+                </a>
+              </td>
+              <td class="py-4 pl-4 text-slate-600 leading-relaxed">
+                <ul class="list-disc pl-4 space-y-1">
+                  <li>09/14正本からの差分は4点。(1)MGLRU: VMemKV/LTMのみoff(推奨デプロイ条件)、他はON。(2)ページ内完結配置: 1ページ以下のレコードが境界を跨がない(1 Getあたり最大1 fault)。(3)8B inlineのmemcmp除去。(4)測定誤差削減: LTMセル単位隔離。</li>
+                </ul>
+              </td>
+            </tr>
+            <tr>
               <td class="py-4 pr-4 text-slate-400">2026-09-14</td>
               <td class="py-4 px-4 font-medium">
                 <a href="2026091416_charts.html" class="text-indigo-600 hover:text-indigo-800 hover:underline">

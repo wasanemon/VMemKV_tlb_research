@@ -91,6 +91,10 @@ struct T2Store {
 - `bytes_used` は次に追記する record の offset を表す。
 - record offset は `0 <= offset < bytes_used` を満たす必要がある。
 - record の開始 offset は `alignof(ValueRecordHeader)` (8バイト) 境界にアラインされる。
+  さらに、1ページ(4096バイト)以下の record はページ境界を跨がない。跨ぐ場合は次ページ
+  先頭へスキップする。1ページ超の record は開始を4KBアラインする。cold read の fault
+  回数を最小化するための配置であり、スキップ空白は live record を含まないため
+  `bytes_used` の単調増加・hole-punch 可能性・live 集計には影響しない。
   物理配置は8バイト単位だが、`payload_bits` の embedded block count は16バイト粒度
   (`aligned_len / 16` を切り捨て) のサイズヒントであり、最大で8バイト過小になる。
   読み取り側はヒント+16バイトのマージンで判定する。block count が16ビットに収まらない
@@ -561,7 +565,7 @@ T1 `reorganize` は atomic pointer swap 機構で実現され、同様に専用�
 
 ## 7. Opt-in Optimizations
 
-本節のうち adaptive covering と Bloom filter は opt-in で、無効でも正しく動作する。Group Commit・`MADV_RANDOM`・base 領域専用読み取り経路は常時有効である。
+本節のうち adaptive covering と Bloom filter は opt-in で、無効でも正しく動作する。Group Commit・`MADV_RANDOM`・base 領域専用読み取り経路・ページ内完結配置は常時有効である。
 
 ### 7.1 Group Commit
 
@@ -617,6 +621,14 @@ T2 の「base」領域(2.2節)は書き込み後二度と変更されないた�
   - `base_mmap_scan`(read-only mmap、カーネルのデフォルト(適応的)readahead方針): 1ページより大きいレコードの Scan 読み取りと、`get_impl()` の大レコード読み取りのうちページキャッシュ常駐が確認できた場合(`mincore()`)に使う。
   - `read_fd`(`dup()`したファイルディスクリプタ経由の`pread()`): `get_impl()`の大レコード読み取りで、上記のページキャッシュ常駐確認が取れなかった場合に、そのレコード1つぶんにサイズを絞って読む。
 - **測定方法・結果**: `implementation/vmemkv/docs/benchmark/20260807_scan_t2_base_tail_io_uring_read.md`(base/tail split と実データ読み取りの元設計)、`implementation/vmemkv/docs/benchmark/20260810_t2_no_madvise_random.md`を参照。`Scan` は他の Op と共通のマスターコーパスを使用する。
+
+### 7.6 推奨ページング条件
+
+LTM運用では classic LRU(MGLRU 無効)を推奨する。MGLRU(Multi-Gen LRU)は Linux カーネルの
+世代別ページ置換機構であり、ディストロ既定で有効なことが多い。fault 駆動のランダム
+読み取りが多いワークロードでは classic LRU の方がホット滞留率が高い。ベンチマーク条件
+としての扱い(VMemKV 側のみ適用、ライバル側はディストロ既定)と実測値は
+`implementation/vmemkv/docs/benchmark/20260919_mglru_sensitivity.md` を参照。
 
 ## 8. Parameters
 

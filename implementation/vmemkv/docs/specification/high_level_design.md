@@ -209,6 +209,7 @@ Tier 2 の稼働中 mmap は `MAP_SHARED` である。書き込みはページ�
 詳細は [low_level_design.md](./low_level_design.md) を参照。
 
 - Tier 2 `madvise(MADV_RANDOM)`（常時有効）
+- LTM運用の推奨ページング条件（classic LRU。詳細は low_level_design.md 7.6 節）
 - WAL Group Commit（実装済み。ロックフリー固定長リングバッファ方式。詳細は low_level_design.md 7.1 節）
 - entry-level adaptive covering
 - `sorted_region` ネガティブルックアップ用 Bloom filter による miss時の O(1)化
