@@ -498,6 +498,7 @@ static void register_benchmark_context() {
   add_custom_context_from_env("lru_gen_enabled", "VMEMKV_CONTEXT_lru_gen_enabled");
   add_custom_context_from_env("instance_type", "VMEMKV_CONTEXT_instance_type");
   add_custom_context_from_env("aws_region", "VMEMKV_CONTEXT_aws_region");
+  add_custom_context_from_env("ami_id", "VMEMKV_CONTEXT_ami_id");
   add_custom_context_from_env("memo", "VMEMKV_CONTEXT_memo");
   benchmark::AddCustomContext("t1_append_capacity_log2", std::to_string(vmemkv::Config<>::T1AppendCapacityLog2));
   benchmark::AddCustomContext("t1_append_capacity_entries", std::to_string(vmemkv::Config<>::T1AppendCapacityEntries));

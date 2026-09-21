@@ -545,6 +545,7 @@ scenario_context_env_prefix() {
     "" \
     "$memory_swap_max_bytes" \
     "$swap_storage_media"
+  printf 'VMEMKV_CONTEXT_ami_id=%q ' "$AMI_ID"
 }
 
 declare -A SCENARIO_TOTALS=(
@@ -595,15 +596,18 @@ ssh_tee_logs() {
   return "$ssh_status"
 }
 
-# Runs LTM per-(Store, Variant) isolation groups for the benchmarks a filter matches.
-# Each identity gets drop_caches + its OWN systemd-run cgroup scope -- sharing one scope
-# across stores/variants was found to make later-measured stores look artificially faster
-# (the cgroup's memory-reclaim heuristics warm up across corpus files; drop_caches alone
-# does not reset that), and RocksDB's Checkpoint-hardlinked clones need the fresh charge
-# accounting -- see implementation/docs/benchmark/20260805_ltm_get_hit_profiling.md.
-# Discovers exact benchmark names remotely and rebuilds each group's filter as an anchored
-# alternation of its own names (never a re-derived Value=/Op= regex), so this stays correct
-# under every filter shape (plain combo, --quick, --scenario/--value-size limits, YCSB_ONLY).
+# Runs LTM per-cell isolation groups for the benchmarks a filter matches.
+# Each cell (one benchmark name) gets drop_caches + its OWN systemd-run cgroup scope
+# and a pristine master clone. Sharing one scope across cells of a store/variant was
+# found to let later-measured cells reuse the earlier cells' warm page cache (level
+# shifts up to 5x on 64KB-Zipf), and sharing one store holder across cells lets later
+# cells observe earlier cells' writes -- both make results depend on execution order
+# (see implementation/docs/benchmark/20260920_mglru_safety_matrix.md). Per-cell
+# isolation removes both confounds; repetitions within one cell still share its scope
+# (correlated error bars -- documented, not fixed here).
+# Discovers exact benchmark names remotely and runs each as its own anchored filter
+# (never a re-derived Value=/Op= regex), so this stays correct under every filter
+# shape (plain combo, --quick, --scenario/--value-size limits, YCSB_ONLY).
 # Args: $1 = scenario key (only used for env + log labels; the filter fully selects cells),
 #       $2 = benchmark filter to discover and group,
 #       $3 = remote result-path prefix; group files land at "<prefix>_group_<N>_<KEY>.json",
@@ -617,7 +621,7 @@ run_ltm_isolated_groups() {
   local merge_dest="$5" stdout_log="$6" stderr_log="$7" label="$8"
 
   set_ltm_pass_env "$scenario_key"
-  echo "[runner] discovering per-store isolation groups for scenario=$scenario_key ($label) ..."
+  echo "[runner] discovering per-cell isolation groups for scenario=$scenario_key ($label) ..."
   local all_bench_names
   all_bench_names=$(ssh $SSH_OPTS "ubuntu@$PUBLIC_IP" \
     "bash -lc 'cd ~/faultkv/vmemkv && ${LTM_PASS_ENV_PREFIX:+${LTM_PASS_ENV_PREFIX} }./build-rel/benchmark/bench_kv --benchmark_list_tests --benchmark_filter=\"${discover_filter}\" 2>/dev/null'")
@@ -626,19 +630,19 @@ run_ltm_isolated_groups() {
   while IFS= read -r identity_line; do
     [[ -z "$identity_line" ]] && continue
     identities+=("$identity_line")
-  done < <(printf '%s\n' "$all_bench_names" | sed -nE 's#^(Store=[^/]+/Variant=[^/]+)/.*#\1#p' | sort -u)
+  done < <(printf '%s\n' "$all_bench_names" | sort -u)
 
   if [[ "${#identities[@]}" -eq 0 ]]; then
     echo "[ERROR] No benchmarks matched ($label) -- nothing to isolate/run." >&2
     return 1
   fi
-  echo "[runner] ${#identities[@]} isolation groups: ${identities[*]}"
+  echo "[runner] ${#identities[@]} isolation groups (one per cell)"
 
   local -a group_result_paths=()
   local group_idx=0 identity group_names group_filter group_result_path group_remote_cmd group_remote_cmd_quoted group_status
   for identity in "${identities[@]}"; do
     group_idx=$((group_idx + 1))
-    group_names="$(printf '%s\n' "$all_bench_names" | grep -F "${identity}/" | sed -E 's/[][(){}.^$*+?\\|]/\\&/g' | paste -sd'|' -)"
+    group_names="$(printf '%s\n' "$identity" | sed -E 's/[][(){}.^$*+?\\|]/\\&/g')"
     group_filter="^(${group_names})\$"
     group_result_path="${out_prefix}_group_${group_idx}_${KEY_NAME}.json"
     group_result_paths+=("$group_result_path")
