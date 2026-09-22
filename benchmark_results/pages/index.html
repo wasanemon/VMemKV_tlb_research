@@ -66,6 +66,19 @@
           </thead>
           <tbody class="divide-y divide-slate-100">
             <tr>
+              <td class="py-4 pr-4 text-slate-400">2026-09-23</td>
+              <td class="py-4 px-4 font-medium">
+                <a href="20260923_scanfix_charts.html" class="text-indigo-600 hover:text-indigo-800 hover:underline">
+                  AWS i4i x5 split-MGLRU (09/23, scan-fix)
+                </a>
+              </td>
+              <td class="py-4 pl-4 text-slate-600 leading-relaxed">
+                <ul class="list-disc pl-4 space-y-1">
+                  <li>Scan-fix ビルドの VMemKV 再測定(0921正本からのマージ、rivals 不変)。T2ページ内完結を1ページ以下レコードのみに限定+Scanのバッチ読み(128件ソート)を削除。0921で敗れていた LTM Scan-64KB / YCSB-E-64KB が勝利に反転し、winners行列は全セルWIN/EVEN(lossゼロ)。反転セルは同一箱スプリット条件のアンカー測定でも確認済み。</li>
+                </ul>
+              </td>
+            </tr>
+            <tr>
               <td class="py-4 pr-4 text-slate-400">2026-09-21</td>
               <td class="py-4 px-4 font-medium">
                 <a href="20260921_mglru_off_charts.html" class="text-indigo-600 hover:text-indigo-800 hover:underline">

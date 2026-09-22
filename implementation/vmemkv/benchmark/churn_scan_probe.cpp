@@ -14,8 +14,7 @@
 // building this binary twice from the respective trees.
 //
 // Build:   cmake --build build-rel --target churn_scan_probe
-// Run:     VMEMKV_DB_DIR=/path LAYOUT=ordered CHURN_HEAD_PCT=20 \
-//          ./build-rel/benchmark/churn_scan_probe
+// Run:     VMEMKV_DB_DIR=/path LAYOUT=ordered CHURN_HEAD_PCT=20 churn_scan_probe
 
 #include <algorithm>
 #include <array>
