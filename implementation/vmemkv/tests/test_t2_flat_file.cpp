@@ -73,14 +73,18 @@ TEST_CASE("T2FlatFile: append_default keeps one-page records within a single pag
   CHECK(page_aligned > 0);
 }
 
-TEST_CASE("T2FlatFile: append_default page-aligns multi-page records") {
+TEST_CASE("T2FlatFile: append_default packs multi-page records contiguously") {
   TempT2File t2;
   auto mem = t2.file.get_memory();
-  // Misalign the frontier first so alignment is observable, not incidental.
-  t2.file.append_default(mem, as_span(bytes_of("pad")), as_span(bytes_of("x")));
+  // A misaligned frontier is where a containment gap would have been inserted
+  // under page alignment; multi-page records pack at the exact frontier instead.
+  const uint64_t pad_offset = t2.file.append_default(mem, as_span(bytes_of("pad")), as_span(bytes_of("x")));
+  const uint64_t pad_len =
+      vmemkv::record_aligned_len(sizeof(ValueRecordHeader), std::string("pad").size(), std::string("x").size());
   const std::string big_value(65536, 'z');
   const uint64_t offset = t2.file.append_default(mem, as_span(bytes_of("big")), as_span(bytes_of(big_value)));
-  CHECK(offset % 4096 == 0);
+  CHECK(pad_offset == 0);
+  CHECK(offset == pad_len);
   CHECK(span_to_string(t2.file.at(offset, mem).value) == big_value);
 }
 

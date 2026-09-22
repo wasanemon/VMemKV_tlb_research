@@ -22,11 +22,12 @@ namespace {
 // so a record's placement decides how many discrete disk I/Os that Get costs.
 constexpr uint64_t kPageBytes = 4096;
 
-// Gap before `frontier` so a record of `required` bytes faults the minimum page
-// count: a record of one page or less never straddles a boundary; a larger record
-// starts page-aligned and touches exactly ceil(len/page) pages instead of one more.
-// Skipped gaps hold no record and are never reused (bytes_used only grows), so they
-// stay zero-filled sparse holes the punch path already treats as hollow.
+// Gap before `frontier` so a record of `required` bytes keeps its page span tight: a
+// record of one page or less never straddles a boundary; a larger record packs
+// contiguously so sequential scans keep full readahead merging (see
+// docs/benchmark/20260921_scan64_readahead_regression.md). Sub-page skips hold no
+// record and are never reused (bytes_used only grows), so they stay zero-filled
+// sparse holes the punch path already treats as hollow.
 uint64_t page_skip_bytes(uint64_t frontier, uint64_t required) noexcept {
   const uint64_t misalignment = frontier % kPageBytes;
   if (misalignment == 0) {
@@ -35,7 +36,7 @@ uint64_t page_skip_bytes(uint64_t frontier, uint64_t required) noexcept {
   if (required <= kPageBytes) {
     return (misalignment + required > kPageBytes) ? (kPageBytes - misalignment) : 0;
   }
-  return kPageBytes - misalignment;
+  return 0;
 }
 
 // Writes a ValueRecordHeader followed by key, value, and zero padding out to the next 8-byte
