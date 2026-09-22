@@ -2,8 +2,8 @@
 //
 // The coordination logic itself lives in src/vmemkv/: hooks.hpp (checkpoint seams and the
 // in-place-update barrier), t2_ownership.hpp (T2 segment accounting, capture watermark,
-// barrier), read_path.hpp (base-region reads, scan batching), write_path.hpp (inline
-// payloads, lock-free appends, in-place updates, stripe protocol, WAL batching),
+// barrier), read_path.hpp (base-region reads, seqlock-protected record reads), write_path.hpp
+// (inline payloads, lock-free appends, in-place updates, stripe protocol, WAL batching),
 // checkpoint_coordinator.hpp (checkpoint/reorganize orchestration), and
 // defrag_controller.hpp (T2 defragmentation). This class owns lifetimes (T1/T2/WAL,
 // stripes, background workers) and delegates every operation to those units.
@@ -480,13 +480,6 @@ class VMemKVImpl {
 
     vmemkv::ScanActiveGuard<T1IndexT> scan_active_guard(t1_);
 
-    // Bounded offset-ordered read batches; see flush_scan_batch().
-    constexpr size_t kScanBatchSize = 128;
-    std::vector<vmemkv::ScanBatchSlot> batch;
-    batch.reserve(kScanBatchSize);
-    std::vector<size_t> read_order;
-    read_order.reserve(kScanBatchSize);
-    std::vector<std::byte> arena;
     // Bounds are constant across every entry this call yields: check once whether the
     // sorted walk's prefix containment already implies full-key containment, and skip
     // the per-entry recheck when it does (see scan_bounds_clean()).
@@ -519,13 +512,47 @@ class VMemKVImpl {
                  }
                }
 
-               batch.push_back({payload, hash});
-               ++total_count;
-               if (batch.size() >= kScanBatchSize) {
-                 vmemkv::flush_scan_batch<ConfigT>(batch, read_order, arena, t2_, lower_bound, upper_bound, callback);
+               const T2Memory *mem = t2_.get_memory();
+
+               // Base-region fast path: see try_read_base_record()'s doc comment. No seqlock
+               // needed -- the base mappings' bytes are immutable once written, so callback can
+               // safely receive live spans straight into them.
+               if (const auto base_record =
+                       vmemkv::try_read_base_record<ConfigT>(mem, payload, vmemkv::BaseReader::kScan, nullptr);
+                   base_record.has_value()) {
+                 if (vmemkv::key_in_range(base_record->key, lower_bound, upper_bound)) {
+                   callback(base_record->key, base_record->value);
+                 }
+                 ++total_count;
+                 return;
                }
+
+               // t2_.at() called inside read_t2_record_seqlock() (as AtFunc), matching
+               // get_impl() -- see read_t2_record_seqlock()'s comment for why an unprotected
+               // t2_.at() call isn't safe here.
+               //
+               // Torn-read fix: copy_func below must only *copy* into an owned buffer and
+               // return, never invoke `callback` from inside it -- see get_impl()'s identical
+               // fix and comment for the full rationale. thread_local since this is called
+               // concurrently from many threads; static so repeated calls reuse already-grown
+               // capacity instead of reallocating.
+               thread_local static std::vector<std::byte> tl_scan_key_buf;
+               thread_local static std::vector<std::byte> tl_scan_value_buf;
+               const bool in_range =
+                   vmemkv::read_t2_record_seqlock([&]() -> T2RecordView { return t2_.at(payload & kOffsetMask, mem); },
+                                                  [&](const T2RecordView &record) -> bool {
+                                                    if (!vmemkv::key_in_range(record.key, lower_bound, upper_bound)) {
+                                                      return false;
+                                                    }
+                                                    tl_scan_key_buf.assign(record.key.begin(), record.key.end());
+                                                    tl_scan_value_buf.assign(record.value.begin(), record.value.end());
+                                                    return true;
+                                                  });
+               if (in_range) {
+                 callback(std::span<const std::byte>(tl_scan_key_buf), std::span<const std::byte>(tl_scan_value_buf));
+               }
+               ++total_count;
              });
-    vmemkv::flush_scan_batch<ConfigT>(batch, read_order, arena, t2_, lower_bound, upper_bound, callback);
 
     return total_count;
   }

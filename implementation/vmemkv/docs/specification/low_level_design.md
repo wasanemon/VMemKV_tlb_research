@@ -92,9 +92,11 @@ struct T2Store {
 - record offset は `0 <= offset < bytes_used` を満たす必要がある。
 - record の開始 offset は `alignof(ValueRecordHeader)` (8バイト) 境界にアラインされる。
   さらに、1ページ(4096バイト)以下の record はページ境界を跨がない。跨ぐ場合は次ページ
-  先頭へスキップする。1ページ超の record は開始を4KBアラインする。cold read の fault
-  回数を最小化するための配置であり、スキップ空白は live record を含まないため
-  `bytes_used` の単調増加・hole-punch 可能性・live 集計には影響しない。
+  先頭へスキップする。1ページ超の record は詰めて配置する(ページ整列による隙間を作らない)。
+  ページ内完結は 1ページ以下レコードの cold read fault 回数を最小化する配置であり、
+  複数ページレコードはどちらの配置でも触れるページ数が同じである一方、配置隙間は
+  Scan の readahead マージを壊すため詰めて配置する。スキップ空白は live record を
+  含まないため `bytes_used` の単調増加・hole-punch 可能性・live 集計には影響しない。
   物理配置は8バイト単位だが、`payload_bits` の embedded block count は16バイト粒度
   (`aligned_len / 16` を切り捨て) のサイズヒントであり、最大で8バイト過小になる。
   読み取り側はヒント+16バイトのマージンで判定する。block count が16ビットに収まらない
@@ -240,7 +242,7 @@ flowchart TD
 2. Tier 1 `append_region` の全体を走査し、範囲内の `IndexEntry` を候補に集める。
 3. Tier 1 `sorted_region` を `key_prefix` で二分探索し、範囲内候補を列挙する。
 4. 候補ごとに `payload_bits != STORE_NOT_FOUND` を確認する。inline entry は `payload_bits` を `inline_size` に従いバイトコピーして値を復元し、16 バイト prefix の末尾ゼロ trim でキーを復元する。
-5. 非 inline 候補は `kScanBatchSize`(128) 件ごとにバッチ化し、T2 物理 offset 昇順に読み替えてからキー順に戻して返す。
+5. 非 inline 候補は T1 の yield 順(キー順)に逐次 T2 record を読む。
 6. `payload_bits` から Tier 2 record を取得する。
 7. full key を比較し、範囲内の record だけを返す。
 
@@ -248,7 +250,6 @@ flowchart TD
 
 - `key_prefix` はあくまで coarse filter である。
 - full key 比較は Tier 2 で行う。inline entry は Tier 1 のみで完結する。
-- バッチ読替は Scan 内部のみの順序最適化であり、コールバック順序と件数の意味は変わらない。
 
 ### 3.6 Bulk Load
 
@@ -643,7 +644,6 @@ LTM運用では classic LRU(MGLRU 無効)を推奨する。MGLRU(Multi-Gen LRU)�
 | `T2DefragSpaceOverheadPercent` | live 比率下限(%)。live が `bytes_used` のこの値以下で初回発火(ヒステリシス付き)。唯一の公開ノブ |
 | `T2DefragMaxMoveBytesPerCycle` | 1 defrag サイクルの移動上限 |
 | `maintenance_soft_threshold` | シャード append 容量の 50%。Scan 取得中は L2 キャッシュサイズ上限に下がる。背景メンテナンス投入閾値 |
-| `kScanBatchSize` | Scan の T2 offset 昇順バッチ件数。128 固定 |
 | `kWalCheckStride` | WAL サイズトリガのサンプリング間隔。64 書き込みごと |
 | `T1ReorgWorkerThreads` | T1 背景ワーカープールサイズ。既定値は hardware_concurrency/4(最低 1) |
 

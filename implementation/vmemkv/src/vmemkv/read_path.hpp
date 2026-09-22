@@ -24,7 +24,6 @@
 #include <cstddef>
 #include <cstdint>
 #include <cstring>
-#include <numeric>
 #include <optional>
 #include <span>
 #include <thread>
@@ -74,7 +73,7 @@ inline auto read_t2_record_seqlock(AtFunc &&at_func, CopyFunc &&copy_func) {
 // thing that determines the mapping/strategy choice in that function's switch.
 enum class BaseReader : uint8_t {
   kGet,   // One record per call, effectively random access -- never wants readahead.
-  kScan,  // ~100 records per call in roughly ascending offset order -- benefits from it.
+  kScan,  // A contiguous key range per call -- benefits from readahead.
 };
 
 // Mapping choice for one base-region read, per record. Picking the "wrong" mapping for a
@@ -82,11 +81,11 @@ enum class BaseReader : uint8_t {
 // mapping here covers the identical underlying bytes.
 template <typename ConfigT>
 struct BaseMappingSelector {
-  // Scan reads ~100 records per call in roughly ascending offset order, so unlike Get it
-  // benefits from kernel readahead: small records (many faults per call) want
-  // MADV_SEQUENTIAL's wider window; large records would have one call's readahead
-  // overshoot into unrelated neighboring records, so they use the plain/no-advise mapping
-  // instead.
+  // Scan reads a contiguous key range (~100 records per call), which traverses the base
+  // region in ascending offset order, so unlike Get it benefits from kernel readahead:
+  // small records (many faults per call) want MADV_SEQUENTIAL's wider window; large
+  // records would have one call's readahead overshoot into unrelated neighboring
+  // records, so they use the plain/no-advise mapping instead.
   static auto for_scan(const T2Memory *mem, bool is_small) noexcept -> std::byte * {
     if constexpr (ConfigT::UseReadPolicyRandomOnly) {
       return mem->base;
@@ -322,94 +321,6 @@ struct ScanActiveGuard {
   const T1 &t1;
   explicit ScanActiveGuard(const T1 &t1) : t1(t1) { t1.set_scan_active(true); }
   ~ScanActiveGuard() { t1.set_scan_active(false); }
-};
-
-// One scan batch slot: T1 yields matches in key order, but their T2 offsets decorrelate
-// from key order once updates/deletes churn (ordering fragmentation), so each batch is read
-// in ascending T2 physical-offset order (what BaseReader::kScan's readahead policy is tuned
-// for) and handed to the caller's callback back in key order.
-struct ScanBatchSlot {
-  uint64_t payload{};
-  uint64_t hash{};
-  std::span<const std::byte> key{};
-  std::span<const std::byte> value{};
-  size_t arena_key_off = 0;
-  size_t arena_key_len = 0;
-  size_t arena_val_len = 0;
-  bool copied = false;
-  bool skipped = false;
-};
-
-// Reads one accumulated batch offset-ordered, then replays it to `callback` in T1's key
-// order. Scan-internal only: no writer-stop, no space reclaimed, and callback order plus
-// count semantics are unchanged (batches complete strictly in sequence, entries within a
-// batch in T1 order).
-template <typename ConfigT, typename Callback>
-void flush_scan_batch(std::vector<ScanBatchSlot> &batch,
-                      std::vector<size_t> &read_order,
-                      std::vector<std::byte> &arena,
-                      const T2FlatFile &t2,
-                      std::span<const std::byte> lower_bound,
-                      std::span<const std::byte> upper_bound,
-                      Callback &callback) {
-  if (batch.empty()) {
-    return;
-  }
-  const T2Memory *mem = t2.get_memory();
-  read_order.resize(batch.size());
-  std::iota(read_order.begin(), read_order.end(), size_t{0});
-  std::sort(read_order.begin(), read_order.end(), [&](size_t a, size_t b) {
-    return (batch[a].payload & detail::kPayloadOffsetMask) < (batch[b].payload & detail::kPayloadOffsetMask);
-  });
-  arena.clear();
-  for (const size_t idx : read_order) {
-    ScanBatchSlot &slot = batch[idx];
-    // Base-region fast path: no seqlock needed -- the base mappings' bytes are immutable
-    // once written, so the callback below can safely receive live spans straight into them.
-    if (const auto base_record = try_read_base_record<ConfigT>(mem, slot.payload, BaseReader::kScan, nullptr);
-        base_record.has_value()) {
-      slot.key = base_record->key;
-      slot.value = base_record->value;
-      continue;
-    }
-    // Torn-read fix: copy_func below must only *copy* into the arena and return, never
-    // invoke `callback` from inside it -- the seqlock's before/after version check only
-    // bounds what happens *around* copy_func's call. Spans into the arena materialize only
-    // after the read loop (the arena never grows past that point, so they stay stable
-    // through the callbacks).
-    slot.skipped =
-        !read_t2_record_seqlock([&]() -> T2RecordView { return t2.at(slot.payload & detail::kPayloadOffsetMask, mem); },
-                                [&](const T2RecordView &record) -> bool {
-                                  if (!key_in_range(record.key, lower_bound, upper_bound)) {
-                                    return false;
-                                  }
-                                  slot.arena_key_off = arena.size();
-                                  slot.arena_key_len = record.key.size();
-                                  slot.arena_val_len = record.value.size();
-                                  arena.insert(arena.end(), record.key.begin(), record.key.end());
-                                  arena.insert(arena.end(), record.value.begin(), record.value.end());
-                                  slot.copied = true;
-                                  return true;
-                                });
-  }
-  for (ScanBatchSlot &slot : batch) {
-    // copied implies !skipped (copy_func only sets copied when returning true).
-    if (slot.copied) {
-      slot.key = std::span<const std::byte>(arena.data() + slot.arena_key_off, slot.arena_key_len);
-      slot.value =
-          std::span<const std::byte>(arena.data() + slot.arena_key_off + slot.arena_key_len, slot.arena_val_len);
-    }
-  }
-  for (const ScanBatchSlot &slot : batch) {  // Back in T1's key order.
-    if (slot.skipped) {
-      continue;
-    }
-    if (!slot.copied && !key_in_range(slot.key, lower_bound, upper_bound)) {
-      continue;
-    }
-    callback(slot.key, slot.value);
-  }
-  batch.clear();
 };
 
 }  // namespace vmemkv

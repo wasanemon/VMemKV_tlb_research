@@ -20,4 +20,7 @@ FetchContent_MakeAvailable(google_benchmark)
 add_executable(bench_kv bench_kv.cpp)
 target_link_libraries(bench_kv PRIVATE vmemkv vmemkv_headers benchmark::benchmark)
 
+add_executable(churn_scan_probe churn_scan_probe.cpp)
+target_link_libraries(churn_scan_probe PRIVATE vmemkv vmemkv_headers)
+
 vmemkv_link_rival_backends(bench_kv)
