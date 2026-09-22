@@ -74,7 +74,7 @@
               </td>
               <td class="py-4 pl-4 text-slate-600 leading-relaxed">
                 <ul class="list-disc pl-4 space-y-1">
-                  <li>Scan-fix ビルドの VMemKV 再測定(0921正本からのマージ、rivals 不変)。T2ページ内完結を1ページ以下レコードのみに限定+Scanのバッチ読み(128件ソート)を削除。0921で敗れていた LTM Scan-64KB / YCSB-E-64KB が勝利に反転し、winners行列は全セルWIN/EVEN(lossゼロ)。反転セルは同一箱スプリット条件のアンカー測定でも確認済み。</li>
+                  <li>Batched reading for Scan operations was removed.</li>
                 </ul>
               </td>
             </tr>
