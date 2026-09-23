@@ -1,0 +1,216 @@
+{
+  "reasons": {
+    "R1": {
+      "cat": "O",
+      "color": "indigo",
+      "short": "T1 Inline Value",
+      "detail": "8バイト以下の値はT2をバイパスしT1 payloadに格納する。8Bシナリオと混在コーパスの8B分を底上げする。",
+      "doc": "docs/specification/low_level_design.md 7.2"
+    },
+    "R2": {
+      "cat": "O",
+      "color": "amber",
+      "short": "Bloom filter",
+      "detail": "sorted_regionのmissをO(1)で打ち切り、T2への不要なランダムリードを回避する。Get_Missの主因。",
+      "doc": "docs/specification/low_level_design.md 7.3"
+    },
+    "R3": {
+      "cat": "O",
+      "color": "sky",
+      "short": "base/tail trifecta read policy",
+      "detail": "base領域をレコードサイズ・reader別に読む(主mmap / sequential mmap / pread+mincore)。LTMのScan・大レコードGetの主因。+PinSeq/+PinRandomはそのablation。trifecta自体は常時有効のため、この表からの分離は不可で根拠は過去の測定文書による。",
+      "doc": "docs/specification/low_level_design.md 7.5, docs/benchmark/20260807_scan_t2_base_tail_io_uring_read.md, docs/benchmark/20260810_get_base_mmap_fast_path.md"
+    },
+    "R4": {
+      "cat": "A",
+      "color": "emerald",
+      "short": "append-only Insert + append_region O(1) hash",
+      "detail": "InsertはT2末尾追記+T1 append_region追加のみ。LSM的な書増幅がなく、最適化なしでも速い土台。",
+      "doc": "docs/specification/high_level_design.md 3, low_level_design.md 3.2"
+    },
+    "R5": {
+      "cat": "A",
+      "color": "teal",
+      "short": "alloc内 in-place Update",
+      "detail": "割当内に収まる更新はT2追記・T1書換なしで完結する。Zipf Updateの主因。",
+      "doc": "docs/specification/low_level_design.md 3.3"
+    },
+    "R6": {
+      "cat": "A",
+      "color": "cyan",
+      "short": "tombstone-only Delete",
+      "detail": "DeleteはT1のtombstone書換のみでT2に触らない。Deleteの主因。",
+      "doc": "docs/specification/low_level_design.md 3.4"
+    },
+    "R7": {
+      "cat": "A",
+      "color": "violet",
+      "short": "Two-Region + sharded T1 background reorganize/split",
+      "detail": "append→sortedの統合をシャード単位の背景処理で吸収し、Scan/YCSBの持続スループットを保つ。",
+      "doc": "docs/specification/high_level_design.md 3/6, low_level_design.md 4.2/4.6"
+    },
+    "R8": {
+      "cat": "A",
+      "color": "slate",
+      "short": "T1 two-region lookup + T2 direct mmap",
+      "detail": "Get_HitはT1のO(1)+O(log N)探索とT2 file-mmap直接読みで完結する。Baseline勝利セルは最適化ではなくこの地力による。",
+      "doc": "docs/specification/low_level_design.md 3.1"
+    },
+    "R9": {
+      "cat": "?",
+      "color": "rose",
+      "short": "要調査(再測定対象)",
+      "detail": "variant間に実装で説明できない乱高下があり、このセルでは勝因を断定しない。再測定で分散を確認する。",
+      "doc": "cell_reasons.json R9"
+    },
+    "R10": {
+      "cat": "?",
+      "color": "orange",
+      "short": "僅差(要再測定)",
+      "detail": "全storeが団子で誤差と区別困難。WIN表示を残しつつ再測定対象とする。",
+      "doc": "cell_reasons.json R10"
+    }
+  },
+  "cells": {
+    "Insert|8B_In-Memory": [
+      "R4",
+      "R1"
+    ],
+    "Insert|1KB_In-Memory": [
+      "R4",
+      "R1"
+    ],
+    "Insert|1KB_LTM": [
+      "R4",
+      "R1"
+    ],
+    "Insert|64KB_LTM": [
+      "R4",
+      "R9"
+    ],
+    "Update|8B_In-Memory": [
+      "R5"
+    ],
+    "Update|1KB_In-Memory": [
+      "R5"
+    ],
+    "Update|1KB_LTM": [
+      "R5",
+      "R9"
+    ],
+    "Update|64KB_LTM": [
+      "R5",
+      "R9"
+    ],
+    "Delete|8B_In-Memory": [
+      "R6",
+      "R1"
+    ],
+    "Delete|1KB_In-Memory": [
+      "R6"
+    ],
+    "Delete|1KB_LTM": [
+      "R6",
+      "R9"
+    ],
+    "Delete|64KB_LTM": [
+      "R6",
+      "R9"
+    ],
+    "Get_Miss|8B_In-Memory": [
+      "R2"
+    ],
+    "Get_Miss|1KB_In-Memory": [
+      "R2"
+    ],
+    "Get_Miss|1KB_LTM": [
+      "R2",
+      "R3"
+    ],
+    "Get_Miss|64KB_LTM": [
+      "R2",
+      "R3"
+    ],
+    "Get_Hit_Zipf|8B_In-Memory": [
+      "R8"
+    ],
+    "Get_Hit_Zipf|1KB_In-Memory": [
+      "R8"
+    ],
+    "Get_Hit_Zipf|1KB_LTM": [
+      "R8",
+      "R3"
+    ],
+    "Get_Hit_Zipf|64KB_LTM": [
+      "R8",
+      "R1"
+    ],
+    "Get_Hit_Uniform|8B_In-Memory": [
+      "R8"
+    ],
+    "Get_Hit_Uniform|1KB_In-Memory": [
+      "R8"
+    ],
+    "Get_Hit_Uniform|1KB_LTM": [
+      "R8",
+      "R1"
+    ],
+    "Get_Hit_Uniform|64KB_LTM": [
+      "R8",
+      "R3"
+    ],
+    "Scan_Zipf|8B_In-Memory": [
+      "R7",
+      "R1"
+    ],
+    "Scan_Zipf|1KB_In-Memory": [
+      "R7"
+    ],
+    "Scan_Zipf|1KB_LTM": [
+      "R7",
+      "R3"
+    ],
+    "Scan_Zipf|64KB_LTM": [
+      "R7",
+      "R3",
+      "R1"
+    ],
+    "Scan_Uniform|8B_In-Memory": [
+      "R7",
+      "R1"
+    ],
+    "Scan_Uniform|1KB_In-Memory": [
+      "R7"
+    ],
+    "Scan_Uniform|1KB_LTM": [
+      "R7",
+      "R3"
+    ],
+    "Scan_Uniform|64KB_LTM": [
+      "R7",
+      "R3",
+      "R10"
+    ],
+    "YCSB_E|8B_In-Memory": [
+      "R7",
+      "R1"
+    ],
+    "YCSB_E|1KB_In-Memory": [
+      "R7"
+    ],
+    "YCSB_E|1KB_LTM": [
+      "R7",
+      "R3"
+    ],
+    "YCSB_E|64KB_LTM": [
+      "R7",
+      "R3",
+      "R10"
+    ]
+  },
+  "notes": [
+    "LTMセルはsplit-MGLRU条件(VMemKV classic-LRU / rival MGLRU-on)で測定しており、差分の一部はページング条件差を含む。詳細は low_level_design.md 7.6 と docs/benchmark/20260920_split_condition_publication.md を参照。",
+    "セル名の+Inline/+BF/+PinSeqはそのセルで最速だったvariantであり、必ずしも勝因そのものではない(近接variant間の差が小さい場合は incidental)。1%以内の同着はセル内に併記する。勝因の検証は同レポート内のablation差分(Baseline vs +BF vs +Inline)で行うこと。R9のセルは差分自体が不安定なため理由を断定しない。R10のセルは全storeが団子のため誤差と区別できない。",
+    "R9の割付基準: 同一セル内でvariant間に実装で説明できない落差(+BF 0.33〜0.64x、+Inline 0.73〜0.77x、+PinRandom 0.51〜0.77x)があり、1.03〜1.09x級の効果主張がノイズと区別できない場合。Bloomは読み専用ゲート(src/t1_index/t1_index.hpp find_sorted)のためwrite系の落差を説明できない。"
+  ]
+}

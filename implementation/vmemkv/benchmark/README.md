@@ -37,6 +37,7 @@ This directory contains the benchmark executable, the local runner, the AWS runn
   - Insert-QPS impact of `ShardedT1Index`'s own automatic per-shard background splitting under sustained write load.
 - `generate_report.py`
   - Generates a `benchmark_results/pages/<id>_charts.html` report from a `benchmark_results/<id>/` directory.
+  - `--cell-reasons cell_reasons.json` renders per-cell `[Rn]` win-reason badges (hover tooltip) plus a footnote legend below the Winners matrix; the JSON file is the single source of truth for reason catalog and cell mapping.
 - `merge_partial_results.py`
   - Merges a partial-matrix run's entries (`--keep-prefix`, default `Store=VMemKV/`) back into a prior full-matrix run's numbers (e.g. `--without-rivals` VMemKV-only or `--leanstore-only` LeanStore-only runs).
 - `aws/aws_clean.sh`

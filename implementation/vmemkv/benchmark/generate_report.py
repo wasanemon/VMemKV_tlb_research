@@ -9,9 +9,14 @@ Usage:
   generate_report.py --report-id 2026081711 --template pages/2026081313_charts.html \
                       --title-suffix "(without-rivals + livelock fixes)" \
                       --description "..." --out pages/2026081711_charts.html
+
+  Cell win reasons (optional, single source of truth is cell_reasons.json next to
+  this script): --cell-reasons cell_reasons.json renders per-cell [Rn] badges with
+  hover tooltips plus a footnote legend right below the Winners matrix.
 """
 
 import argparse
+import html
 import json
 import re
 from pathlib import Path
@@ -332,6 +337,9 @@ def render_organic_split_chart_html(organic_split_data, chart_suffix=""):
 
 
 def compute_winners_matrix(raw_data):
+    # VMemKV variants within _TIE_BAND of the best share the winner label (同着):
+    # sub-1% gaps are not attributable to any variant's mechanism.
+    _TIE_BAND = 0.01
     rows = []
     for workload in WORKLOADS:
         cells = []
@@ -342,7 +350,6 @@ def compute_winners_matrix(raw_data):
                 continue
             idx32 = THREADS.index(32)
             best_vmemkv = None
-            best_vmemkv_label = None
             best_rival = None
             best_rival_label = None
             for label, values in op_data.items():
@@ -354,14 +361,19 @@ def compute_winners_matrix(raw_data):
                         best_rival, best_rival_label = v, label
                 else:
                     if best_vmemkv is None or v > best_vmemkv:
-                        best_vmemkv, best_vmemkv_label = v, label
+                        best_vmemkv = v
             if best_vmemkv is None or best_rival is None or best_rival == 0:
                 cells.append(None)
                 continue
+            tied = [label for label in VARIANT_ORDER
+                    if label not in RIVAL_STORES and label in op_data
+                    and op_data[label][idx32] is not None
+                    and op_data[label][idx32] >= best_vmemkv * (1 - _TIE_BAND)]
             ratio = best_vmemkv / best_rival
             cells.append({
                 "ratio": ratio,
-                "vmemkv_label": best_vmemkv_label,
+                "vmemkv_label": tied[0],
+                "vmemkv_labels": tied,
                 "rival_label": best_rival_label,
             })
         rows.append((workload, cells))
@@ -404,7 +416,33 @@ def _badge_for_ratio(ratio):
     return _badge_tier(ratio, _RATIO_TIERS)
 
 
-def render_winners_matrix_html(rows):
+# Per-reason colors (keys are cell_reasons.json's "color" field): pale badge classes
+# for matrix badges + legend chips, solid dot class for the tooltip header.
+_REASON_PALETTE = {
+    "indigo": ("bg-indigo-50 text-indigo-700 border-indigo-200", "bg-indigo-400"),
+    "amber": ("bg-amber-50 text-amber-700 border-amber-200", "bg-amber-400"),
+    "sky": ("bg-sky-50 text-sky-700 border-sky-200", "bg-sky-400"),
+    "emerald": ("bg-emerald-50 text-emerald-700 border-emerald-200", "bg-emerald-400"),
+    "teal": ("bg-teal-50 text-teal-700 border-teal-200", "bg-teal-400"),
+    "cyan": ("bg-cyan-50 text-cyan-700 border-cyan-200", "bg-cyan-400"),
+    "violet": ("bg-violet-50 text-violet-700 border-violet-200", "bg-violet-400"),
+    "slate": ("bg-slate-100 text-slate-600 border-slate-200", "bg-slate-400"),
+    "rose": ("bg-rose-50 text-rose-700 border-rose-200", "bg-rose-400"),
+    "orange": ("bg-orange-50 text-orange-700 border-orange-200", "bg-orange-400"),
+}
+
+
+def _reason_colors(info):
+    """(badge_classes, dot_class) for a reason entry; unknown colors fall back to indigo."""
+    return _REASON_PALETTE.get((info or {}).get("color", "indigo"), _REASON_PALETTE["indigo"])
+
+
+def render_winners_matrix_html(rows, cell_reasons=None):
+    """Winners matrix <tr> rows. cell_reasons (load_cell_reasons()'s output, or None)
+    adds per-cell [Rn] badges with hover tooltips; unknown/missing cells render bare."""
+    reasons = (cell_reasons or {}).get("reasons", {})
+    cells_map = (cell_reasons or {}).get("cells", {})
+    scenario_keys = ["8B_In-Memory", "1KB_In-Memory", "1KB_LTM", "64KB_LTM"]
     workload_display = {
         "Insert": "Insert", "Update": "Update (Zipf)", "Delete": "Delete",
         "Get_Miss": "Get (Miss)", "Get_Hit_Zipf": "Get (Hit, Zipf)", "Get_Hit_Uniform": "Get (Hit, Uniform)",
@@ -414,21 +452,164 @@ def render_winners_matrix_html(rows):
     out = []
     for workload, cells in rows:
         out.append(f'<tr class="hover:bg-indigo-50/10 transition-colors"><td class="py-3.5 px-4 font-bold text-slate-800 bg-slate-50/20">{workload_display[workload]}</td>')
-        for cell in cells:
+        for scenario_key, cell in zip(scenario_keys, cells):
             if cell is None:
                 out.append('<td class="py-3.5 px-4 text-slate-300 text-xs">n/a</td>')
                 continue
             ratio = cell["ratio"]
             label_text, badge_class = _badge_for_ratio(ratio)
+            tied_labels = cell.get("vmemkv_labels", [cell["vmemkv_label"]])
+            vmemkv_text = tied_labels[0] if len(tied_labels) == 1 else ", ".join(tied_labels) + " 同着"
+            reason_ids = cells_map.get(f"{workload}|{scenario_key}", [])
+            reason_badges = []
+            for rid in reason_ids:
+                info = reasons.get(rid)
+                if info is None:
+                    reason_badges.append(html.escape(str(rid)))
+                    continue
+                # Rich tooltip content travels in data-* attributes; the shared
+                # floating panel (render_cell_reasons_legend()) renders them. Native
+                # title= is deliberately not used (unstyled, delayed, single-line).
+                tip_title = html.escape(f'{rid} [{info.get("cat", "?")}] {info.get("short", "")}', quote=True)
+                tip_body = html.escape(str(info.get("detail", "")), quote=True)
+                tip_doc = html.escape(str(info.get("doc", "")), quote=True)
+                badge_cls, dot_cls = _reason_colors(info)
+                reason_badges.append(
+                    f'<span class="reason-badge inline-flex items-center px-1 py-0.5 rounded text-[10px] border '
+                    f'{badge_cls} font-bold cursor-help" tabindex="0" '
+                    f'data-tip-title="{tip_title}" data-tip-body="{tip_body}" data-tip-doc="{tip_doc}" '
+                    f'data-tip-dot="{dot_cls}">{html.escape(str(rid))}</span>')
+            reasons_html = ""
+            if reason_badges:
+                reasons_html = '<span class="flex flex-wrap gap-1 mt-1">' + "".join(reason_badges) + "</span>"
             out.append(f'''<td class="py-3.5 px-4 transition-colors">
   <div class="flex flex-col gap-0.5">
     {badge_html(f"\n      {label_text} ({ratio:.2f}x)\n    ", f"{badge_class} font-bold  w-fit")}
-    <span class="text-[11px] text-slate-500 font-medium">vmemkv ({cell["vmemkv_label"]})</span>
-    <span class="text-[10px] text-slate-400">vs {cell["rival_label"]}</span>
+    <span class="text-[11px] text-slate-500 font-medium">vmemkv ({html.escape(vmemkv_text)})</span>
+    <span class="text-[10px] text-slate-400">vs {cell["rival_label"]}</span>{reasons_html}
   </div>
 </td>''')
         out.append("</tr>")
     return "\n".join(out)
+
+
+def load_cell_reasons(path):
+    """Loads a cell_reasons.json file: {"reasons": {R1: {cat, short, detail, doc}},
+    "cells": {"<WORKLOAD>|<scenario_key>": [R..]}, "notes": [...]}. Returns {} when
+    path is None (caller renders the matrix bare)."""
+    if path is None:
+        return {}
+    data = json.loads(Path(path).read_text())
+    return {"reasons": data.get("reasons", {}), "cells": data.get("cells", {}),
+            "notes": data.get("notes", [])}
+
+
+def render_cell_reasons_legend(cell_reasons, rows):
+    """Footnote legend for the [Rn] badges actually used by this report's matrix, plus
+    suite-wide notes. Empty when no reasons file was given (nothing to footnote)."""
+    reasons = (cell_reasons or {}).get("reasons", {})
+    cells_map = (cell_reasons or {}).get("cells", {})
+    notes = (cell_reasons or {}).get("notes", [])
+    if not reasons:
+        return ""
+    scenario_keys = ["8B_In-Memory", "1KB_In-Memory", "1KB_LTM", "64KB_LTM"]
+    used = []
+    for workload, cells in rows:
+        for scenario_key, cell in zip(scenario_keys, cells):
+            if cell is None:
+                continue
+            for rid in cells_map.get(f"{workload}|{scenario_key}", []):
+                if rid not in used:
+                    used.append(rid)
+    used.sort(key=lambda rid: (0, int(rid[1:])) if rid[1:].isdigit() else (1, rid))
+
+    def render_reason(rid):
+        info = reasons.get(rid)
+        if info is None:
+            return f'          <li><strong>{html.escape(str(rid))}</strong></li>'
+        doc = html.escape(str(info.get("doc", "")))
+        badge_cls, _ = _reason_colors(info)
+        chip = (f'<span class="inline-flex items-center px-1 py-0.5 rounded text-[10px] border '
+                f'{badge_cls} font-bold">{html.escape(str(rid))}</span>')
+        return (f'          <li>{chip} <strong>[{html.escape(str(info.get("cat", "?")))}] '
+                f'{html.escape(str(info.get("short", "")))}</strong>: {html.escape(str(info.get("detail", "")))} '
+                f'<span class="text-slate-400">({doc})</span></li>')
+
+    items = "\n".join(render_reason(rid) for rid in used)
+    notes_html = "".join(f'          <li class="text-slate-400">{html.escape(str(note))}</li>' for note in notes)
+    # Safelist of the solid dot classes the tooltip script assigns at runtime, so the
+    # Tailwind Play CDN generates them from this static scan instead of relying on its
+    # MutationObserver catching the hover-time class swap.
+    dot_safelist = " ".join(sorted({dot for _, dot in _REASON_PALETTE.values()}))
+    # Sentinel-wrapped so reruns replace (not duplicate) the legend: main() strips any
+    # existing block between these markers before inserting the fresh one.
+    return f'''<!-- cell-reasons-legend:start -->
+        <div class="mt-4 border-t border-slate-100 pt-4">
+          <p class="text-xs font-bold text-slate-700 mb-1">Why each cell wins -- reason legend (hover or focus a badge)</p>
+          <ul class="space-y-1 text-xs text-slate-500 list-disc pl-4">
+{items}
+          </ul>
+          <ul class="space-y-1 text-[11px] mt-2 list-disc pl-4">
+{notes_html}
+          </ul>
+          <div class="hidden"><span class="{dot_safelist}"></span></div>
+        </div>''' + _REASON_TIP_PANEL_HTML + '''
+        <!-- cell-reasons-legend:end -->'''
+
+
+# Shared floating tooltip panel for every .reason-badge above. Tailwind-styled to match
+# the report; position:fixed (not group-hover) so it is never clipped by the matrix's
+# overflow-x-auto container. One panel + one delegated listener set for the whole page.
+_REASON_TIP_PANEL_HTML = '''
+        <div id="reason-tip" class="hidden fixed z-50 w-72 max-w-[calc(100vw-16px)]" role="tooltip">
+          <div class="bg-slate-900 rounded-lg shadow-xl border border-slate-700 overflow-hidden">
+            <div class="flex items-center gap-2 px-3 py-2 border-b border-white/10">
+              <span id="reason-tip-dot" class="inline-block w-2 h-2 rounded-full bg-indigo-400"></span>
+              <p id="reason-tip-title" class="text-xs font-bold text-white"></p>
+            </div>
+            <p id="reason-tip-body" class="text-[11px] leading-relaxed px-3 py-2 text-slate-200"></p>
+            <p id="reason-tip-doc" class="text-[10px] px-3 pb-2 text-slate-400"></p>
+          </div>
+        </div>
+        <script>
+        (function () {
+          var tip = document.getElementById('reason-tip');
+          if (!tip) { return; }
+          var titleEl = document.getElementById('reason-tip-title');
+          var bodyEl = document.getElementById('reason-tip-body');
+          var docEl = document.getElementById('reason-tip-doc');
+          var dotEl = document.getElementById('reason-tip-dot');
+          function show(anchor) {
+            titleEl.textContent = anchor.getAttribute('data-tip-title') || '';
+            bodyEl.textContent = anchor.getAttribute('data-tip-body') || '';
+            docEl.textContent = anchor.getAttribute('data-tip-doc') || '';
+            dotEl.className = 'inline-block w-2 h-2 rounded-full ' + (anchor.getAttribute('data-tip-dot') || 'bg-indigo-400');
+            tip.classList.remove('hidden');
+            var r = anchor.getBoundingClientRect();
+            var w = tip.offsetWidth;
+            var h = tip.offsetHeight;
+            var x = r.left + r.width / 2 - w / 2;
+            x = Math.max(8, Math.min(x, window.innerWidth - w - 8));
+            var y = r.top - h - 8;
+            if (y < 8) { y = r.bottom + 8; }
+            tip.style.left = x + 'px';
+            tip.style.top = y + 'px';
+          }
+          function hide() { tip.classList.add('hidden'); }
+          document.addEventListener('mouseover', function (e) {
+            var t = e.target && e.target.closest ? e.target.closest('.reason-badge') : null;
+            if (t) { show(t); return; }
+            var inTip = e.target && e.target.closest ? e.target.closest('#reason-tip') : null;
+            if (!inTip) { hide(); }
+          });
+          document.addEventListener('focusin', function (e) {
+            var t = e.target && e.target.closest ? e.target.closest('.reason-badge') : null;
+            if (t) { show(t); }
+          });
+          document.addEventListener('focusout', hide);
+          document.addEventListener('scroll', hide, true);
+        })();
+        </script>'''
 
 
 def _badge_for_slowdown(pct):
@@ -539,6 +720,8 @@ def main():
     parser.add_argument("--title", required=True)
     parser.add_argument("--description-html", required=True)
     parser.add_argument("--env-html", required=True)
+    parser.add_argument("--cell-reasons", required=False, default=None,
+                        help="Optional cell_reasons.json (default: render the matrix bare)")
     args = parser.parse_args()
 
     html = args.template.read_text()
@@ -550,6 +733,7 @@ def main():
     organic_split_data = build_organic_split_data(args.report_dir)
     organic_split_random_data = build_organic_split_data(args.report_dir, prefix="organic_split_random")
     winners_rows = compute_winners_matrix(raw_data)
+    cell_reasons = load_cell_reasons(args.cell_reasons)
 
     html = html.replace(args.template_id, args.report_id)
 
@@ -680,7 +864,26 @@ def main():
     tbody_start = html.index(tbody_marker)
     tbody_content_start = tbody_start + len('<tbody class="divide-y divide-slate-100">\n')
     tbody_end = html.index("</tbody>", tbody_content_start)
-    html = html[:tbody_content_start] + render_winners_matrix_html(winners_rows) + "\n" + html[tbody_end:]
+    html = html[:tbody_content_start] + render_winners_matrix_html(winners_rows, cell_reasons) + "\n" + html[tbody_end:]
+
+    # Reason legend: inside the Winners section, right below the matrix table.
+    # Strip any block a previous run left behind first (idempotent reruns).
+    legend_html = render_cell_reasons_legend(cell_reasons, winners_rows)
+    if legend_html:
+        start_marker, end_marker = "<!-- cell-reasons-legend:start -->", "<!-- cell-reasons-legend:end -->"
+        while start_marker in html and end_marker in html:
+            block_start = html.index(start_marker)
+            block_end = html.index(end_marker) + len(end_marker)
+            rest = html[block_end:]
+            # Consume the single separator ("\n" + indent) this step appends after
+            # every insert, so strip+reinsert round-trips byte-identically.
+            if rest.startswith("\n"):
+                rest = rest[1:]
+                rest = rest[len(rest) - len(rest.lstrip(" \t")):]
+            html = html[:block_start] + rest
+        tbody_end = html.index("</tbody>", tbody_content_start)
+        winners_section_close = html.index("</section>", tbody_end)
+        html = html[:winners_section_close] + legend_html + "\n      " + html[winners_section_close:]
 
     # Tier 1 / Tier 1+2 reorganize-duration summary grid: dropped as 100% redundant with the
     # per-tab "Reorganize Duration vs. Corpus Size" chart (removed once, so a no-op if the
