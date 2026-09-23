@@ -19,6 +19,7 @@ import argparse
 import html
 import json
 import re
+from collections import OrderedDict
 from pathlib import Path
 
 STORE_VARIANT_TO_LABEL = {
@@ -420,22 +421,22 @@ def _badge_for_ratio(ratio):
 # for matrix badges + legend chips, solid dot class for the tooltip header, and a
 # strong cell-highlight background (inline style, so it never shifts layout).
 _REASON_PALETTE = {
-    "indigo": ("bg-indigo-50 text-indigo-700 border-indigo-200", "bg-indigo-400", "#e0e7ff"),
-    "amber": ("bg-amber-50 text-amber-700 border-amber-200", "bg-amber-400", "#fef3c7"),
-    "sky": ("bg-sky-50 text-sky-700 border-sky-200", "bg-sky-400", "#e0f2fe"),
+    "blue": ("bg-blue-50 text-blue-700 border-blue-200", "bg-blue-400", "#dbeafe"),
     "emerald": ("bg-emerald-50 text-emerald-700 border-emerald-200", "bg-emerald-400", "#d1fae5"),
-    "teal": ("bg-teal-50 text-teal-700 border-teal-200", "bg-teal-400", "#ccfbf1"),
-    "cyan": ("bg-cyan-50 text-cyan-700 border-cyan-200", "bg-cyan-400", "#cffafe"),
-    "violet": ("bg-violet-50 text-violet-700 border-violet-200", "bg-violet-400", "#ede9fe"),
-    "slate": ("bg-slate-100 text-slate-600 border-slate-200", "bg-slate-400", "#e2e8f0"),
-    "rose": ("bg-rose-50 text-rose-700 border-rose-200", "bg-rose-400", "#ffe4e6"),
+    "green": ("bg-green-50 text-green-700 border-green-200", "bg-green-400", "#dcfce7"),
+    "amber": ("bg-amber-50 text-amber-700 border-amber-200", "bg-amber-400", "#fef3c7"),
     "orange": ("bg-orange-50 text-orange-700 border-orange-200", "bg-orange-400", "#ffedd5"),
+    "yellow": ("bg-yellow-50 text-yellow-700 border-yellow-200", "bg-yellow-400", "#fef9c3"),
+    "violet": ("bg-violet-50 text-violet-700 border-violet-200", "bg-violet-400", "#ede9fe"),
+    "purple": ("bg-purple-50 text-purple-700 border-purple-200", "bg-purple-400", "#f3e8ff"),
+    "rose": ("bg-rose-50 text-rose-700 border-rose-200", "bg-rose-400", "#ffe4e6"),
+    "stone": ("bg-stone-200 text-stone-700 border-stone-300", "bg-stone-400", "#e7e5e4"),
 }
 
 
 def _reason_colors(info):
     """(badge_classes, dot_class, highlight_bg) for a reason entry; unknown colors fall back to indigo."""
-    return _REASON_PALETTE.get((info or {}).get("color", "indigo"), _REASON_PALETTE["indigo"])
+    return _REASON_PALETTE.get((info or {}).get("color", "blue"), _REASON_PALETTE["blue"])
 
 
 def render_winners_matrix_html(rows, cell_reasons=None):
@@ -472,7 +473,7 @@ def render_winners_matrix_html(rows, cell_reasons=None):
                 # floating panel (render_cell_reasons_legend()) renders them. Native
                 # title= is deliberately not used (unstyled, delayed, single-line).
                 # data-rid drives cross-highlighting of every cell carrying this reason.
-                tip_title = html.escape(f'{rid} [{info.get("cat", "?")}] {info.get("short", "")}', quote=True)
+                tip_title = html.escape(f'{rid} [{info.get("concept", "?")}・{info.get("cat", "?")}] {info.get("short", "")}', quote=True)
                 tip_body = html.escape(str(info.get("detail", "")), quote=True)
                 tip_doc = html.escape(str(info.get("doc", "")), quote=True)
                 badge_cls, dot_cls, hl_bg = _reason_colors(info)
@@ -507,15 +508,17 @@ def load_cell_reasons(path):
         return {}
     data = json.loads(Path(path).read_text())
     return {"reasons": data.get("reasons", {}), "cells": data.get("cells", {}),
-            "notes": data.get("notes", [])}
+            "notes": data.get("notes", []), "concepts": data.get("concepts", {})}
 
 
 def render_cell_reasons_legend(cell_reasons, rows):
-    """Footnote legend for the [Rn] badges actually used by this report's matrix, plus
-    suite-wide notes. Empty when no reasons file was given (nothing to footnote)."""
+    """Footnote legend for the [Rn] badges actually used by this report's matrix, grouped
+    by concept (cell_reasons.json's "concepts"), plus suite-wide notes. Empty when no
+    reasons file was given (nothing to footnote)."""
     reasons = (cell_reasons or {}).get("reasons", {})
     cells_map = (cell_reasons or {}).get("cells", {})
     notes = (cell_reasons or {}).get("notes", [])
+    concepts = (cell_reasons or {}).get("concepts", {})
     if not reasons:
         return ""
     scenario_keys = ["8B_In-Memory", "1KB_In-Memory", "1KB_LTM", "64KB_LTM"]
@@ -527,7 +530,6 @@ def render_cell_reasons_legend(cell_reasons, rows):
             for rid in cells_map.get(f"{workload}|{scenario_key}", []):
                 if rid not in used:
                     used.append(rid)
-    used.sort(key=lambda rid: (0, int(rid[1:])) if rid[1:].isdigit() else (1, rid))
 
     def render_reason(rid):
         info = reasons.get(rid)
@@ -539,11 +541,34 @@ def render_cell_reasons_legend(cell_reasons, rows):
         hl_attr = html.escape(hl_bg, quote=True)
         chip = (f'<span class="reason-chip inline-flex items-center px-1 py-0.5 rounded text-[10px] border '
                 f'{badge_cls} font-bold cursor-help" tabindex="0" data-rid="{rid_attr}" data-hl="{hl_attr}">{html.escape(str(rid))}</span>')
-        return (f'          <li>{chip} <strong>[{html.escape(str(info.get("cat", "?")))}] '
-                f'{html.escape(str(info.get("short", "")))}</strong>: {html.escape(str(info.get("detail", "")))} '
+        return (f'          <li>{chip} <strong>{html.escape(str(info.get("short", "")))}</strong>: '
+                f'{html.escape(str(info.get("detail", "")))} '
                 f'<span class="text-slate-400">({doc})</span></li>')
 
-    items = "\n".join(render_reason(rid) for rid in used)
+    def group_order(rid):
+        concept = (reasons.get(rid) or {}).get("concept", "M")
+        m = re.match(r"^R(\d+)$", rid)
+        num = (0, int(m.group(1))) if m else (1, 0)
+        return (0 if concept != "M" else 1, concept, num, rid)
+
+    groups = OrderedDict()
+    for rid in sorted(used, key=group_order):
+        concept = (reasons.get(rid) or {}).get("concept", "M")
+        groups.setdefault(concept, []).append(rid)
+
+    sections = []
+    for concept, rids in groups.items():
+        meta = concepts.get(concept, {})
+        if meta:
+            heading = (f'          <p class="text-xs font-bold text-slate-700 mt-3 mb-1">{html.escape(concept)} '
+                       f'{html.escape(str(meta.get("title", "")))} '
+                       f'<span class="font-normal text-slate-600">-- {html.escape(str(meta.get("desc", "")))}</span></p>')
+        else:
+            heading = (f'          <p class="text-xs font-bold text-slate-700 mt-3 mb-1">Annotations '
+                       f'<span class="font-normal text-slate-600">-- 技術概念ではなく状態の注記。再測定対象。</span></p>')
+        items = "\n".join(render_reason(rid) for rid in rids)
+        sections.append(f'{heading}\n          <ul class="space-y-1 text-xs text-slate-500 list-disc pl-4">\n{items}\n          </ul>')
+    groups_html = "\n".join(sections)
     notes_html = "".join(f'          <li class="text-slate-400">{html.escape(str(note))}</li>' for note in notes)
     # Safelist of the solid dot classes the tooltip script assigns at runtime, so the
     # Tailwind Play CDN generates them from this static scan instead of relying on its
@@ -553,10 +578,8 @@ def render_cell_reasons_legend(cell_reasons, rows):
     # existing block between these markers before inserting the fresh one.
     return f'''<!-- cell-reasons-legend:start -->
         <div class="mt-4 border-t border-slate-100 pt-4">
-          <p class="text-xs font-bold text-slate-700 mb-1">Why each cell wins -- reason legend (hover or focus a badge to highlight its cells)</p>
-          <ul class="space-y-1 text-xs text-slate-500 list-disc pl-4">
-{items}
-          </ul>
+          <p class="text-xs font-bold text-slate-700 mb-1">Why each cell wins -- reason legend by concept (hover or focus a badge to highlight its cells)</p>
+{groups_html}
           <ul class="space-y-1 text-[11px] mt-2 list-disc pl-4">
 {notes_html}
           </ul>
