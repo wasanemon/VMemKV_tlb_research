@@ -417,23 +417,24 @@ def _badge_for_ratio(ratio):
 
 
 # Per-reason colors (keys are cell_reasons.json's "color" field): pale badge classes
-# for matrix badges + legend chips, solid dot class for the tooltip header.
+# for matrix badges + legend chips, solid dot class for the tooltip header, and a
+# strong cell-highlight background (inline style, so it never shifts layout).
 _REASON_PALETTE = {
-    "indigo": ("bg-indigo-50 text-indigo-700 border-indigo-200", "bg-indigo-400"),
-    "amber": ("bg-amber-50 text-amber-700 border-amber-200", "bg-amber-400"),
-    "sky": ("bg-sky-50 text-sky-700 border-sky-200", "bg-sky-400"),
-    "emerald": ("bg-emerald-50 text-emerald-700 border-emerald-200", "bg-emerald-400"),
-    "teal": ("bg-teal-50 text-teal-700 border-teal-200", "bg-teal-400"),
-    "cyan": ("bg-cyan-50 text-cyan-700 border-cyan-200", "bg-cyan-400"),
-    "violet": ("bg-violet-50 text-violet-700 border-violet-200", "bg-violet-400"),
-    "slate": ("bg-slate-100 text-slate-600 border-slate-200", "bg-slate-400"),
-    "rose": ("bg-rose-50 text-rose-700 border-rose-200", "bg-rose-400"),
-    "orange": ("bg-orange-50 text-orange-700 border-orange-200", "bg-orange-400"),
+    "indigo": ("bg-indigo-50 text-indigo-700 border-indigo-200", "bg-indigo-400", "#e0e7ff"),
+    "amber": ("bg-amber-50 text-amber-700 border-amber-200", "bg-amber-400", "#fef3c7"),
+    "sky": ("bg-sky-50 text-sky-700 border-sky-200", "bg-sky-400", "#e0f2fe"),
+    "emerald": ("bg-emerald-50 text-emerald-700 border-emerald-200", "bg-emerald-400", "#d1fae5"),
+    "teal": ("bg-teal-50 text-teal-700 border-teal-200", "bg-teal-400", "#ccfbf1"),
+    "cyan": ("bg-cyan-50 text-cyan-700 border-cyan-200", "bg-cyan-400", "#cffafe"),
+    "violet": ("bg-violet-50 text-violet-700 border-violet-200", "bg-violet-400", "#ede9fe"),
+    "slate": ("bg-slate-100 text-slate-600 border-slate-200", "bg-slate-400", "#e2e8f0"),
+    "rose": ("bg-rose-50 text-rose-700 border-rose-200", "bg-rose-400", "#ffe4e6"),
+    "orange": ("bg-orange-50 text-orange-700 border-orange-200", "bg-orange-400", "#ffedd5"),
 }
 
 
 def _reason_colors(info):
-    """(badge_classes, dot_class) for a reason entry; unknown colors fall back to indigo."""
+    """(badge_classes, dot_class, highlight_bg) for a reason entry; unknown colors fall back to indigo."""
     return _REASON_PALETTE.get((info or {}).get("color", "indigo"), _REASON_PALETTE["indigo"])
 
 
@@ -470,19 +471,24 @@ def render_winners_matrix_html(rows, cell_reasons=None):
                 # Rich tooltip content travels in data-* attributes; the shared
                 # floating panel (render_cell_reasons_legend()) renders them. Native
                 # title= is deliberately not used (unstyled, delayed, single-line).
+                # data-rid drives cross-highlighting of every cell carrying this reason.
                 tip_title = html.escape(f'{rid} [{info.get("cat", "?")}] {info.get("short", "")}', quote=True)
                 tip_body = html.escape(str(info.get("detail", "")), quote=True)
                 tip_doc = html.escape(str(info.get("doc", "")), quote=True)
-                badge_cls, dot_cls = _reason_colors(info)
+                badge_cls, dot_cls, hl_bg = _reason_colors(info)
+                rid_attr = html.escape(str(rid), quote=True)
+                hl_attr = html.escape(hl_bg, quote=True)
                 reason_badges.append(
                     f'<span class="reason-badge inline-flex items-center px-1 py-0.5 rounded text-[10px] border '
-                    f'{badge_cls} font-bold cursor-help" tabindex="0" '
+                    f'{badge_cls} font-bold cursor-help" tabindex="0" data-rid="{rid_attr}" data-hl="{hl_attr}" '
                     f'data-tip-title="{tip_title}" data-tip-body="{tip_body}" data-tip-doc="{tip_doc}" '
                     f'data-tip-dot="{dot_cls}">{html.escape(str(rid))}</span>')
             reasons_html = ""
+            cell_reasons_attr = ""
             if reason_badges:
                 reasons_html = '<span class="flex flex-wrap gap-1 mt-1">' + "".join(reason_badges) + "</span>"
-            out.append(f'''<td class="py-3.5 px-4 transition-colors">
+                cell_reasons_attr = f' data-reasons="{html.escape(" ".join(str(r) for r in reason_ids), quote=True)}"'
+            out.append(f'''<td class="py-3.5 px-4 transition-colors"{cell_reasons_attr}>
   <div class="flex flex-col gap-0.5">
     {badge_html(f"\n      {label_text} ({ratio:.2f}x)\n    ", f"{badge_class} font-bold  w-fit")}
     <span class="text-[11px] text-slate-500 font-medium">vmemkv ({html.escape(vmemkv_text)})</span>
@@ -528,9 +534,11 @@ def render_cell_reasons_legend(cell_reasons, rows):
         if info is None:
             return f'          <li><strong>{html.escape(str(rid))}</strong></li>'
         doc = html.escape(str(info.get("doc", "")))
-        badge_cls, _ = _reason_colors(info)
-        chip = (f'<span class="inline-flex items-center px-1 py-0.5 rounded text-[10px] border '
-                f'{badge_cls} font-bold">{html.escape(str(rid))}</span>')
+        badge_cls, _, hl_bg = _reason_colors(info)
+        rid_attr = html.escape(str(rid), quote=True)
+        hl_attr = html.escape(hl_bg, quote=True)
+        chip = (f'<span class="reason-chip inline-flex items-center px-1 py-0.5 rounded text-[10px] border '
+                f'{badge_cls} font-bold cursor-help" tabindex="0" data-rid="{rid_attr}" data-hl="{hl_attr}">{html.escape(str(rid))}</span>')
         return (f'          <li>{chip} <strong>[{html.escape(str(info.get("cat", "?")))}] '
                 f'{html.escape(str(info.get("short", "")))}</strong>: {html.escape(str(info.get("detail", "")))} '
                 f'<span class="text-slate-400">({doc})</span></li>')
@@ -540,12 +548,12 @@ def render_cell_reasons_legend(cell_reasons, rows):
     # Safelist of the solid dot classes the tooltip script assigns at runtime, so the
     # Tailwind Play CDN generates them from this static scan instead of relying on its
     # MutationObserver catching the hover-time class swap.
-    dot_safelist = " ".join(sorted({dot for _, dot in _REASON_PALETTE.values()}))
+    dot_safelist = " ".join(sorted({dot for _, dot, _ in _REASON_PALETTE.values()}))
     # Sentinel-wrapped so reruns replace (not duplicate) the legend: main() strips any
     # existing block between these markers before inserting the fresh one.
     return f'''<!-- cell-reasons-legend:start -->
         <div class="mt-4 border-t border-slate-100 pt-4">
-          <p class="text-xs font-bold text-slate-700 mb-1">Why each cell wins -- reason legend (hover or focus a badge)</p>
+          <p class="text-xs font-bold text-slate-700 mb-1">Why each cell wins -- reason legend (hover or focus a badge to highlight its cells)</p>
           <ul class="space-y-1 text-xs text-slate-500 list-disc pl-4">
 {items}
           </ul>
@@ -596,17 +604,45 @@ _REASON_TIP_PANEL_HTML = '''
             tip.style.top = y + 'px';
           }
           function hide() { tip.classList.add('hidden'); }
+          function ridOf(el) { return el.getAttribute ? el.getAttribute('data-rid') : null; }
+          // Cross-highlight: paint every matrix cell carrying rid with the hovered
+          // badge's highlight color, dim the rest. Background-only styling, so cell
+          // geometry never moves.
+          function clearHighlight() {
+            var tds = document.querySelectorAll('td[data-reasons]');
+            for (var i = 0; i < tds.length; i++) { tds[i].style.backgroundColor = ''; tds[i].style.opacity = ''; }
+          }
+          function highlight(rid, color) {
+            clearHighlight();
+            var tds = document.querySelectorAll('td[data-reasons]');
+            for (var i = 0; i < tds.length; i++) {
+              var rs = (tds[i].getAttribute('data-reasons') || '').split(' ');
+              var hit = false;
+              for (var k = 0; k < rs.length; k++) { if (rs[k] === rid) { hit = true; break; } }
+              if (hit) { tds[i].style.backgroundColor = color; }
+              else { tds[i].style.opacity = '0.45'; }
+            }
+          }
           document.addEventListener('mouseover', function (e) {
-            var t = e.target && e.target.closest ? e.target.closest('.reason-badge') : null;
-            if (t) { show(t); return; }
-            var inTip = e.target && e.target.closest ? e.target.closest('#reason-tip') : null;
-            if (!inTip) { hide(); }
+            var tgt = e.target && e.target.closest ? e.target : null;
+            var t = tgt ? tgt.closest('.reason-badge') : null;
+            var inTip = tgt ? tgt.closest('#reason-tip') : null;
+            if (t) { show(t); } else if (!inTip) { hide(); }
+            var h = tgt ? tgt.closest('[data-rid]') : null;
+            if (h) { highlight(ridOf(h), h.getAttribute('data-hl') || '#e0e7ff'); } else if (!inTip) { clearHighlight(); }
           });
           document.addEventListener('focusin', function (e) {
-            var t = e.target && e.target.closest ? e.target.closest('.reason-badge') : null;
+            var tgt = e.target && e.target.closest ? e.target : null;
+            if (!tgt) { return; }
+            var t = tgt.closest('.reason-badge');
             if (t) { show(t); }
+            var h = tgt.closest('[data-rid]');
+            if (h) { highlight(ridOf(h), h.getAttribute('data-hl') || '#e0e7ff'); }
           });
-          document.addEventListener('focusout', hide);
+          document.addEventListener('focusout', function () { hide(); clearHighlight(); });
+          document.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape') { hide(); clearHighlight(); }
+          });
           document.addEventListener('scroll', hide, true);
         })();
         </script>'''

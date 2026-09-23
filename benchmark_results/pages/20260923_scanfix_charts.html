@@ -125,344 +125,344 @@
             </thead>
             <tbody class="divide-y divide-slate-100">
 <tr class="hover:bg-indigo-50/10 transition-colors"><td class="py-3.5 px-4 font-bold text-slate-800 bg-slate-50/20">Insert</td>
-<td class="py-3.5 px-4 transition-colors">
+<td class="py-3.5 px-4 transition-colors" data-reasons="R4 R1">
   <div class="flex flex-col gap-0.5">
     <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] border bg-emerald-600 text-white border-transparent shadow-sm font-bold  w-fit">
       ✅ WIN (1.53x)
     </span>
     <span class="text-[11px] text-slate-500 font-medium">vmemkv (+Inline)</span>
-    <span class="text-[10px] text-slate-400">vs RocksDB-BlobDB</span><span class="flex flex-wrap gap-1 mt-1"><span class="reason-badge inline-flex items-center px-1 py-0.5 rounded text-[10px] border bg-emerald-50 text-emerald-700 border-emerald-200 font-bold cursor-help" tabindex="0" data-tip-title="R4 [A] append-only Insert + append_region O(1) hash" data-tip-body="InsertはT2末尾追記+T1 append_region追加のみ。LSM的な書増幅がなく、最適化なしでも速い土台。" data-tip-doc="docs/specification/high_level_design.md 3, low_level_design.md 3.2" data-tip-dot="bg-emerald-400">R4</span><span class="reason-badge inline-flex items-center px-1 py-0.5 rounded text-[10px] border bg-indigo-50 text-indigo-700 border-indigo-200 font-bold cursor-help" tabindex="0" data-tip-title="R1 [O] T1 Inline Value" data-tip-body="8バイト以下の値はT2をバイパスしT1 payloadに格納する。8Bシナリオと混在コーパスの8B分を底上げする。" data-tip-doc="docs/specification/low_level_design.md 7.2" data-tip-dot="bg-indigo-400">R1</span></span>
+    <span class="text-[10px] text-slate-400">vs RocksDB-BlobDB</span><span class="flex flex-wrap gap-1 mt-1"><span class="reason-badge inline-flex items-center px-1 py-0.5 rounded text-[10px] border bg-emerald-50 text-emerald-700 border-emerald-200 font-bold cursor-help" tabindex="0" data-rid="R4" data-hl="#d1fae5" data-tip-title="R4 [A] append-only Insert + append_region O(1) hash" data-tip-body="InsertはT2末尾追記+T1 append_region追加のみ。LSM的な書増幅がなく、最適化なしでも速い土台。" data-tip-doc="docs/specification/high_level_design.md 3, low_level_design.md 3.2" data-tip-dot="bg-emerald-400">R4</span><span class="reason-badge inline-flex items-center px-1 py-0.5 rounded text-[10px] border bg-indigo-50 text-indigo-700 border-indigo-200 font-bold cursor-help" tabindex="0" data-rid="R1" data-hl="#e0e7ff" data-tip-title="R1 [O] T1 Inline Value" data-tip-body="8バイト以下の値はT2をバイパスしT1 payloadに格納する。8Bシナリオと混在コーパスの8B分を底上げする。" data-tip-doc="docs/specification/low_level_design.md 7.2" data-tip-dot="bg-indigo-400">R1</span></span>
   </div>
 </td>
-<td class="py-3.5 px-4 transition-colors">
+<td class="py-3.5 px-4 transition-colors" data-reasons="R4 R1">
   <div class="flex flex-col gap-0.5">
     <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] border bg-emerald-600 text-white border-transparent shadow-sm font-bold  w-fit">
       ✅ WIN (1.43x)
     </span>
     <span class="text-[11px] text-slate-500 font-medium">vmemkv (+Inline)</span>
-    <span class="text-[10px] text-slate-400">vs RocksDB-BlobDB</span><span class="flex flex-wrap gap-1 mt-1"><span class="reason-badge inline-flex items-center px-1 py-0.5 rounded text-[10px] border bg-emerald-50 text-emerald-700 border-emerald-200 font-bold cursor-help" tabindex="0" data-tip-title="R4 [A] append-only Insert + append_region O(1) hash" data-tip-body="InsertはT2末尾追記+T1 append_region追加のみ。LSM的な書増幅がなく、最適化なしでも速い土台。" data-tip-doc="docs/specification/high_level_design.md 3, low_level_design.md 3.2" data-tip-dot="bg-emerald-400">R4</span><span class="reason-badge inline-flex items-center px-1 py-0.5 rounded text-[10px] border bg-indigo-50 text-indigo-700 border-indigo-200 font-bold cursor-help" tabindex="0" data-tip-title="R1 [O] T1 Inline Value" data-tip-body="8バイト以下の値はT2をバイパスしT1 payloadに格納する。8Bシナリオと混在コーパスの8B分を底上げする。" data-tip-doc="docs/specification/low_level_design.md 7.2" data-tip-dot="bg-indigo-400">R1</span></span>
+    <span class="text-[10px] text-slate-400">vs RocksDB-BlobDB</span><span class="flex flex-wrap gap-1 mt-1"><span class="reason-badge inline-flex items-center px-1 py-0.5 rounded text-[10px] border bg-emerald-50 text-emerald-700 border-emerald-200 font-bold cursor-help" tabindex="0" data-rid="R4" data-hl="#d1fae5" data-tip-title="R4 [A] append-only Insert + append_region O(1) hash" data-tip-body="InsertはT2末尾追記+T1 append_region追加のみ。LSM的な書増幅がなく、最適化なしでも速い土台。" data-tip-doc="docs/specification/high_level_design.md 3, low_level_design.md 3.2" data-tip-dot="bg-emerald-400">R4</span><span class="reason-badge inline-flex items-center px-1 py-0.5 rounded text-[10px] border bg-indigo-50 text-indigo-700 border-indigo-200 font-bold cursor-help" tabindex="0" data-rid="R1" data-hl="#e0e7ff" data-tip-title="R1 [O] T1 Inline Value" data-tip-body="8バイト以下の値はT2をバイパスしT1 payloadに格納する。8Bシナリオと混在コーパスの8B分を底上げする。" data-tip-doc="docs/specification/low_level_design.md 7.2" data-tip-dot="bg-indigo-400">R1</span></span>
   </div>
 </td>
-<td class="py-3.5 px-4 transition-colors">
+<td class="py-3.5 px-4 transition-colors" data-reasons="R4 R1">
   <div class="flex flex-col gap-0.5">
     <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] border bg-emerald-600 text-white border-transparent shadow-sm font-bold  w-fit">
       ✅ WIN (1.34x)
     </span>
     <span class="text-[11px] text-slate-500 font-medium">vmemkv (+Inline)</span>
-    <span class="text-[10px] text-slate-400">vs RocksDB-BlobDB</span><span class="flex flex-wrap gap-1 mt-1"><span class="reason-badge inline-flex items-center px-1 py-0.5 rounded text-[10px] border bg-emerald-50 text-emerald-700 border-emerald-200 font-bold cursor-help" tabindex="0" data-tip-title="R4 [A] append-only Insert + append_region O(1) hash" data-tip-body="InsertはT2末尾追記+T1 append_region追加のみ。LSM的な書増幅がなく、最適化なしでも速い土台。" data-tip-doc="docs/specification/high_level_design.md 3, low_level_design.md 3.2" data-tip-dot="bg-emerald-400">R4</span><span class="reason-badge inline-flex items-center px-1 py-0.5 rounded text-[10px] border bg-indigo-50 text-indigo-700 border-indigo-200 font-bold cursor-help" tabindex="0" data-tip-title="R1 [O] T1 Inline Value" data-tip-body="8バイト以下の値はT2をバイパスしT1 payloadに格納する。8Bシナリオと混在コーパスの8B分を底上げする。" data-tip-doc="docs/specification/low_level_design.md 7.2" data-tip-dot="bg-indigo-400">R1</span></span>
+    <span class="text-[10px] text-slate-400">vs RocksDB-BlobDB</span><span class="flex flex-wrap gap-1 mt-1"><span class="reason-badge inline-flex items-center px-1 py-0.5 rounded text-[10px] border bg-emerald-50 text-emerald-700 border-emerald-200 font-bold cursor-help" tabindex="0" data-rid="R4" data-hl="#d1fae5" data-tip-title="R4 [A] append-only Insert + append_region O(1) hash" data-tip-body="InsertはT2末尾追記+T1 append_region追加のみ。LSM的な書増幅がなく、最適化なしでも速い土台。" data-tip-doc="docs/specification/high_level_design.md 3, low_level_design.md 3.2" data-tip-dot="bg-emerald-400">R4</span><span class="reason-badge inline-flex items-center px-1 py-0.5 rounded text-[10px] border bg-indigo-50 text-indigo-700 border-indigo-200 font-bold cursor-help" tabindex="0" data-rid="R1" data-hl="#e0e7ff" data-tip-title="R1 [O] T1 Inline Value" data-tip-body="8バイト以下の値はT2をバイパスしT1 payloadに格納する。8Bシナリオと混在コーパスの8B分を底上げする。" data-tip-doc="docs/specification/low_level_design.md 7.2" data-tip-dot="bg-indigo-400">R1</span></span>
   </div>
 </td>
-<td class="py-3.5 px-4 transition-colors">
+<td class="py-3.5 px-4 transition-colors" data-reasons="R4 R9">
   <div class="flex flex-col gap-0.5">
     <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] border bg-emerald-600 text-white border-transparent shadow-sm font-bold  w-fit">
       ✅ WIN (1.83x)
     </span>
     <span class="text-[11px] text-slate-500 font-medium">vmemkv (+PinRandom, +PinSeq 同着)</span>
-    <span class="text-[10px] text-slate-400">vs RocksDB-BlobDB</span><span class="flex flex-wrap gap-1 mt-1"><span class="reason-badge inline-flex items-center px-1 py-0.5 rounded text-[10px] border bg-emerald-50 text-emerald-700 border-emerald-200 font-bold cursor-help" tabindex="0" data-tip-title="R4 [A] append-only Insert + append_region O(1) hash" data-tip-body="InsertはT2末尾追記+T1 append_region追加のみ。LSM的な書増幅がなく、最適化なしでも速い土台。" data-tip-doc="docs/specification/high_level_design.md 3, low_level_design.md 3.2" data-tip-dot="bg-emerald-400">R4</span><span class="reason-badge inline-flex items-center px-1 py-0.5 rounded text-[10px] border bg-rose-50 text-rose-700 border-rose-200 font-bold cursor-help" tabindex="0" data-tip-title="R9 [?] 要調査(再測定対象)" data-tip-body="variant間に実装で説明できない乱高下があり、このセルでは勝因を断定しない。再測定で分散を確認する。" data-tip-doc="cell_reasons.json R9" data-tip-dot="bg-rose-400">R9</span></span>
+    <span class="text-[10px] text-slate-400">vs RocksDB-BlobDB</span><span class="flex flex-wrap gap-1 mt-1"><span class="reason-badge inline-flex items-center px-1 py-0.5 rounded text-[10px] border bg-emerald-50 text-emerald-700 border-emerald-200 font-bold cursor-help" tabindex="0" data-rid="R4" data-hl="#d1fae5" data-tip-title="R4 [A] append-only Insert + append_region O(1) hash" data-tip-body="InsertはT2末尾追記+T1 append_region追加のみ。LSM的な書増幅がなく、最適化なしでも速い土台。" data-tip-doc="docs/specification/high_level_design.md 3, low_level_design.md 3.2" data-tip-dot="bg-emerald-400">R4</span><span class="reason-badge inline-flex items-center px-1 py-0.5 rounded text-[10px] border bg-rose-50 text-rose-700 border-rose-200 font-bold cursor-help" tabindex="0" data-rid="R9" data-hl="#ffe4e6" data-tip-title="R9 [?] 要調査(再測定対象)" data-tip-body="variant間に実装で説明できない乱高下があり、このセルでは勝因を断定しない。再測定で分散を確認する。" data-tip-doc="cell_reasons.json R9" data-tip-dot="bg-rose-400">R9</span></span>
   </div>
 </td>
 </tr>
 <tr class="hover:bg-indigo-50/10 transition-colors"><td class="py-3.5 px-4 font-bold text-slate-800 bg-slate-50/20">Update (Zipf)</td>
-<td class="py-3.5 px-4 transition-colors">
+<td class="py-3.5 px-4 transition-colors" data-reasons="R5">
   <div class="flex flex-col gap-0.5">
     <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] border bg-emerald-600 text-white border-transparent shadow-sm font-bold  w-fit">
       ✅ WIN (1.50x)
     </span>
     <span class="text-[11px] text-slate-500 font-medium">vmemkv (Baseline)</span>
-    <span class="text-[10px] text-slate-400">vs RocksDB-BlobDB</span><span class="flex flex-wrap gap-1 mt-1"><span class="reason-badge inline-flex items-center px-1 py-0.5 rounded text-[10px] border bg-teal-50 text-teal-700 border-teal-200 font-bold cursor-help" tabindex="0" data-tip-title="R5 [A] alloc内 in-place Update" data-tip-body="割当内に収まる更新はT2追記・T1書換なしで完結する。Zipf Updateの主因。" data-tip-doc="docs/specification/low_level_design.md 3.3" data-tip-dot="bg-teal-400">R5</span></span>
+    <span class="text-[10px] text-slate-400">vs RocksDB-BlobDB</span><span class="flex flex-wrap gap-1 mt-1"><span class="reason-badge inline-flex items-center px-1 py-0.5 rounded text-[10px] border bg-teal-50 text-teal-700 border-teal-200 font-bold cursor-help" tabindex="0" data-rid="R5" data-hl="#ccfbf1" data-tip-title="R5 [A] alloc内 in-place Update" data-tip-body="割当内に収まる更新はT2追記・T1書換なしで完結する。Zipf Updateの主因。" data-tip-doc="docs/specification/low_level_design.md 3.3" data-tip-dot="bg-teal-400">R5</span></span>
   </div>
 </td>
-<td class="py-3.5 px-4 transition-colors">
+<td class="py-3.5 px-4 transition-colors" data-reasons="R5">
   <div class="flex flex-col gap-0.5">
     <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] border bg-emerald-600 text-white border-transparent shadow-sm font-bold  w-fit">
       ✅ WIN (1.50x)
     </span>
     <span class="text-[11px] text-slate-500 font-medium">vmemkv (Baseline, +Inline 同着)</span>
-    <span class="text-[10px] text-slate-400">vs RocksDB-BlobDB</span><span class="flex flex-wrap gap-1 mt-1"><span class="reason-badge inline-flex items-center px-1 py-0.5 rounded text-[10px] border bg-teal-50 text-teal-700 border-teal-200 font-bold cursor-help" tabindex="0" data-tip-title="R5 [A] alloc内 in-place Update" data-tip-body="割当内に収まる更新はT2追記・T1書換なしで完結する。Zipf Updateの主因。" data-tip-doc="docs/specification/low_level_design.md 3.3" data-tip-dot="bg-teal-400">R5</span></span>
+    <span class="text-[10px] text-slate-400">vs RocksDB-BlobDB</span><span class="flex flex-wrap gap-1 mt-1"><span class="reason-badge inline-flex items-center px-1 py-0.5 rounded text-[10px] border bg-teal-50 text-teal-700 border-teal-200 font-bold cursor-help" tabindex="0" data-rid="R5" data-hl="#ccfbf1" data-tip-title="R5 [A] alloc内 in-place Update" data-tip-body="割当内に収まる更新はT2追記・T1書換なしで完結する。Zipf Updateの主因。" data-tip-doc="docs/specification/low_level_design.md 3.3" data-tip-dot="bg-teal-400">R5</span></span>
   </div>
 </td>
-<td class="py-3.5 px-4 transition-colors">
+<td class="py-3.5 px-4 transition-colors" data-reasons="R5 R9">
   <div class="flex flex-col gap-0.5">
     <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] border bg-emerald-600 text-white border-transparent shadow-sm font-bold  w-fit">
       ✅ WIN (1.26x)
     </span>
     <span class="text-[11px] text-slate-500 font-medium">vmemkv (+Inline)</span>
-    <span class="text-[10px] text-slate-400">vs RocksDB</span><span class="flex flex-wrap gap-1 mt-1"><span class="reason-badge inline-flex items-center px-1 py-0.5 rounded text-[10px] border bg-teal-50 text-teal-700 border-teal-200 font-bold cursor-help" tabindex="0" data-tip-title="R5 [A] alloc内 in-place Update" data-tip-body="割当内に収まる更新はT2追記・T1書換なしで完結する。Zipf Updateの主因。" data-tip-doc="docs/specification/low_level_design.md 3.3" data-tip-dot="bg-teal-400">R5</span><span class="reason-badge inline-flex items-center px-1 py-0.5 rounded text-[10px] border bg-rose-50 text-rose-700 border-rose-200 font-bold cursor-help" tabindex="0" data-tip-title="R9 [?] 要調査(再測定対象)" data-tip-body="variant間に実装で説明できない乱高下があり、このセルでは勝因を断定しない。再測定で分散を確認する。" data-tip-doc="cell_reasons.json R9" data-tip-dot="bg-rose-400">R9</span></span>
+    <span class="text-[10px] text-slate-400">vs RocksDB</span><span class="flex flex-wrap gap-1 mt-1"><span class="reason-badge inline-flex items-center px-1 py-0.5 rounded text-[10px] border bg-teal-50 text-teal-700 border-teal-200 font-bold cursor-help" tabindex="0" data-rid="R5" data-hl="#ccfbf1" data-tip-title="R5 [A] alloc内 in-place Update" data-tip-body="割当内に収まる更新はT2追記・T1書換なしで完結する。Zipf Updateの主因。" data-tip-doc="docs/specification/low_level_design.md 3.3" data-tip-dot="bg-teal-400">R5</span><span class="reason-badge inline-flex items-center px-1 py-0.5 rounded text-[10px] border bg-rose-50 text-rose-700 border-rose-200 font-bold cursor-help" tabindex="0" data-rid="R9" data-hl="#ffe4e6" data-tip-title="R9 [?] 要調査(再測定対象)" data-tip-body="variant間に実装で説明できない乱高下があり、このセルでは勝因を断定しない。再測定で分散を確認する。" data-tip-doc="cell_reasons.json R9" data-tip-dot="bg-rose-400">R9</span></span>
   </div>
 </td>
-<td class="py-3.5 px-4 transition-colors">
+<td class="py-3.5 px-4 transition-colors" data-reasons="R5 R9">
   <div class="flex flex-col gap-0.5">
     <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] border bg-emerald-600 text-white border-transparent shadow-sm font-bold  w-fit">
       ✅ WIN (1.93x)
     </span>
     <span class="text-[11px] text-slate-500 font-medium">vmemkv (+Inline)</span>
-    <span class="text-[10px] text-slate-400">vs LMDB</span><span class="flex flex-wrap gap-1 mt-1"><span class="reason-badge inline-flex items-center px-1 py-0.5 rounded text-[10px] border bg-teal-50 text-teal-700 border-teal-200 font-bold cursor-help" tabindex="0" data-tip-title="R5 [A] alloc内 in-place Update" data-tip-body="割当内に収まる更新はT2追記・T1書換なしで完結する。Zipf Updateの主因。" data-tip-doc="docs/specification/low_level_design.md 3.3" data-tip-dot="bg-teal-400">R5</span><span class="reason-badge inline-flex items-center px-1 py-0.5 rounded text-[10px] border bg-rose-50 text-rose-700 border-rose-200 font-bold cursor-help" tabindex="0" data-tip-title="R9 [?] 要調査(再測定対象)" data-tip-body="variant間に実装で説明できない乱高下があり、このセルでは勝因を断定しない。再測定で分散を確認する。" data-tip-doc="cell_reasons.json R9" data-tip-dot="bg-rose-400">R9</span></span>
+    <span class="text-[10px] text-slate-400">vs LMDB</span><span class="flex flex-wrap gap-1 mt-1"><span class="reason-badge inline-flex items-center px-1 py-0.5 rounded text-[10px] border bg-teal-50 text-teal-700 border-teal-200 font-bold cursor-help" tabindex="0" data-rid="R5" data-hl="#ccfbf1" data-tip-title="R5 [A] alloc内 in-place Update" data-tip-body="割当内に収まる更新はT2追記・T1書換なしで完結する。Zipf Updateの主因。" data-tip-doc="docs/specification/low_level_design.md 3.3" data-tip-dot="bg-teal-400">R5</span><span class="reason-badge inline-flex items-center px-1 py-0.5 rounded text-[10px] border bg-rose-50 text-rose-700 border-rose-200 font-bold cursor-help" tabindex="0" data-rid="R9" data-hl="#ffe4e6" data-tip-title="R9 [?] 要調査(再測定対象)" data-tip-body="variant間に実装で説明できない乱高下があり、このセルでは勝因を断定しない。再測定で分散を確認する。" data-tip-doc="cell_reasons.json R9" data-tip-dot="bg-rose-400">R9</span></span>
   </div>
 </td>
 </tr>
 <tr class="hover:bg-indigo-50/10 transition-colors"><td class="py-3.5 px-4 font-bold text-slate-800 bg-slate-50/20">Delete</td>
-<td class="py-3.5 px-4 transition-colors">
+<td class="py-3.5 px-4 transition-colors" data-reasons="R6 R1">
   <div class="flex flex-col gap-0.5">
     <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] border bg-emerald-600 text-white border-transparent shadow-sm font-bold  w-fit">
       ✅ WIN (1.73x)
     </span>
     <span class="text-[11px] text-slate-500 font-medium">vmemkv (+Inline)</span>
-    <span class="text-[10px] text-slate-400">vs RocksDB-BlobDB</span><span class="flex flex-wrap gap-1 mt-1"><span class="reason-badge inline-flex items-center px-1 py-0.5 rounded text-[10px] border bg-cyan-50 text-cyan-700 border-cyan-200 font-bold cursor-help" tabindex="0" data-tip-title="R6 [A] tombstone-only Delete" data-tip-body="DeleteはT1のtombstone書換のみでT2に触らない。Deleteの主因。" data-tip-doc="docs/specification/low_level_design.md 3.4" data-tip-dot="bg-cyan-400">R6</span><span class="reason-badge inline-flex items-center px-1 py-0.5 rounded text-[10px] border bg-indigo-50 text-indigo-700 border-indigo-200 font-bold cursor-help" tabindex="0" data-tip-title="R1 [O] T1 Inline Value" data-tip-body="8バイト以下の値はT2をバイパスしT1 payloadに格納する。8Bシナリオと混在コーパスの8B分を底上げする。" data-tip-doc="docs/specification/low_level_design.md 7.2" data-tip-dot="bg-indigo-400">R1</span></span>
+    <span class="text-[10px] text-slate-400">vs RocksDB-BlobDB</span><span class="flex flex-wrap gap-1 mt-1"><span class="reason-badge inline-flex items-center px-1 py-0.5 rounded text-[10px] border bg-cyan-50 text-cyan-700 border-cyan-200 font-bold cursor-help" tabindex="0" data-rid="R6" data-hl="#cffafe" data-tip-title="R6 [A] tombstone-only Delete" data-tip-body="DeleteはT1のtombstone書換のみでT2に触らない。Deleteの主因。" data-tip-doc="docs/specification/low_level_design.md 3.4" data-tip-dot="bg-cyan-400">R6</span><span class="reason-badge inline-flex items-center px-1 py-0.5 rounded text-[10px] border bg-indigo-50 text-indigo-700 border-indigo-200 font-bold cursor-help" tabindex="0" data-rid="R1" data-hl="#e0e7ff" data-tip-title="R1 [O] T1 Inline Value" data-tip-body="8バイト以下の値はT2をバイパスしT1 payloadに格納する。8Bシナリオと混在コーパスの8B分を底上げする。" data-tip-doc="docs/specification/low_level_design.md 7.2" data-tip-dot="bg-indigo-400">R1</span></span>
   </div>
 </td>
-<td class="py-3.5 px-4 transition-colors">
+<td class="py-3.5 px-4 transition-colors" data-reasons="R6">
   <div class="flex flex-col gap-0.5">
     <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] border bg-emerald-600 text-white border-transparent shadow-sm font-bold  w-fit">
       ✅ WIN (1.77x)
     </span>
     <span class="text-[11px] text-slate-500 font-medium">vmemkv (Baseline, +BF, +Inline 同着)</span>
-    <span class="text-[10px] text-slate-400">vs RocksDB</span><span class="flex flex-wrap gap-1 mt-1"><span class="reason-badge inline-flex items-center px-1 py-0.5 rounded text-[10px] border bg-cyan-50 text-cyan-700 border-cyan-200 font-bold cursor-help" tabindex="0" data-tip-title="R6 [A] tombstone-only Delete" data-tip-body="DeleteはT1のtombstone書換のみでT2に触らない。Deleteの主因。" data-tip-doc="docs/specification/low_level_design.md 3.4" data-tip-dot="bg-cyan-400">R6</span></span>
+    <span class="text-[10px] text-slate-400">vs RocksDB</span><span class="flex flex-wrap gap-1 mt-1"><span class="reason-badge inline-flex items-center px-1 py-0.5 rounded text-[10px] border bg-cyan-50 text-cyan-700 border-cyan-200 font-bold cursor-help" tabindex="0" data-rid="R6" data-hl="#cffafe" data-tip-title="R6 [A] tombstone-only Delete" data-tip-body="DeleteはT1のtombstone書換のみでT2に触らない。Deleteの主因。" data-tip-doc="docs/specification/low_level_design.md 3.4" data-tip-dot="bg-cyan-400">R6</span></span>
   </div>
 </td>
-<td class="py-3.5 px-4 transition-colors">
+<td class="py-3.5 px-4 transition-colors" data-reasons="R6 R9">
   <div class="flex flex-col gap-0.5">
     <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] border bg-emerald-600 text-white border-transparent shadow-sm font-bold  w-fit">
       ✅ WIN (1.91x)
     </span>
     <span class="text-[11px] text-slate-500 font-medium">vmemkv (Baseline, +BF, +PinRandom, +PinSeq 同着)</span>
-    <span class="text-[10px] text-slate-400">vs RocksDB-BlobDB</span><span class="flex flex-wrap gap-1 mt-1"><span class="reason-badge inline-flex items-center px-1 py-0.5 rounded text-[10px] border bg-cyan-50 text-cyan-700 border-cyan-200 font-bold cursor-help" tabindex="0" data-tip-title="R6 [A] tombstone-only Delete" data-tip-body="DeleteはT1のtombstone書換のみでT2に触らない。Deleteの主因。" data-tip-doc="docs/specification/low_level_design.md 3.4" data-tip-dot="bg-cyan-400">R6</span><span class="reason-badge inline-flex items-center px-1 py-0.5 rounded text-[10px] border bg-rose-50 text-rose-700 border-rose-200 font-bold cursor-help" tabindex="0" data-tip-title="R9 [?] 要調査(再測定対象)" data-tip-body="variant間に実装で説明できない乱高下があり、このセルでは勝因を断定しない。再測定で分散を確認する。" data-tip-doc="cell_reasons.json R9" data-tip-dot="bg-rose-400">R9</span></span>
+    <span class="text-[10px] text-slate-400">vs RocksDB-BlobDB</span><span class="flex flex-wrap gap-1 mt-1"><span class="reason-badge inline-flex items-center px-1 py-0.5 rounded text-[10px] border bg-cyan-50 text-cyan-700 border-cyan-200 font-bold cursor-help" tabindex="0" data-rid="R6" data-hl="#cffafe" data-tip-title="R6 [A] tombstone-only Delete" data-tip-body="DeleteはT1のtombstone書換のみでT2に触らない。Deleteの主因。" data-tip-doc="docs/specification/low_level_design.md 3.4" data-tip-dot="bg-cyan-400">R6</span><span class="reason-badge inline-flex items-center px-1 py-0.5 rounded text-[10px] border bg-rose-50 text-rose-700 border-rose-200 font-bold cursor-help" tabindex="0" data-rid="R9" data-hl="#ffe4e6" data-tip-title="R9 [?] 要調査(再測定対象)" data-tip-body="variant間に実装で説明できない乱高下があり、このセルでは勝因を断定しない。再測定で分散を確認する。" data-tip-doc="cell_reasons.json R9" data-tip-dot="bg-rose-400">R9</span></span>
   </div>
 </td>
-<td class="py-3.5 px-4 transition-colors">
+<td class="py-3.5 px-4 transition-colors" data-reasons="R6 R9">
   <div class="flex flex-col gap-0.5">
     <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] border bg-emerald-600 text-white border-transparent shadow-sm font-bold  w-fit">
       ✅ WIN (3.69x)
     </span>
     <span class="text-[11px] text-slate-500 font-medium">vmemkv (+PinSeq)</span>
-    <span class="text-[10px] text-slate-400">vs RocksDB-BlobDB</span><span class="flex flex-wrap gap-1 mt-1"><span class="reason-badge inline-flex items-center px-1 py-0.5 rounded text-[10px] border bg-cyan-50 text-cyan-700 border-cyan-200 font-bold cursor-help" tabindex="0" data-tip-title="R6 [A] tombstone-only Delete" data-tip-body="DeleteはT1のtombstone書換のみでT2に触らない。Deleteの主因。" data-tip-doc="docs/specification/low_level_design.md 3.4" data-tip-dot="bg-cyan-400">R6</span><span class="reason-badge inline-flex items-center px-1 py-0.5 rounded text-[10px] border bg-rose-50 text-rose-700 border-rose-200 font-bold cursor-help" tabindex="0" data-tip-title="R9 [?] 要調査(再測定対象)" data-tip-body="variant間に実装で説明できない乱高下があり、このセルでは勝因を断定しない。再測定で分散を確認する。" data-tip-doc="cell_reasons.json R9" data-tip-dot="bg-rose-400">R9</span></span>
+    <span class="text-[10px] text-slate-400">vs RocksDB-BlobDB</span><span class="flex flex-wrap gap-1 mt-1"><span class="reason-badge inline-flex items-center px-1 py-0.5 rounded text-[10px] border bg-cyan-50 text-cyan-700 border-cyan-200 font-bold cursor-help" tabindex="0" data-rid="R6" data-hl="#cffafe" data-tip-title="R6 [A] tombstone-only Delete" data-tip-body="DeleteはT1のtombstone書換のみでT2に触らない。Deleteの主因。" data-tip-doc="docs/specification/low_level_design.md 3.4" data-tip-dot="bg-cyan-400">R6</span><span class="reason-badge inline-flex items-center px-1 py-0.5 rounded text-[10px] border bg-rose-50 text-rose-700 border-rose-200 font-bold cursor-help" tabindex="0" data-rid="R9" data-hl="#ffe4e6" data-tip-title="R9 [?] 要調査(再測定対象)" data-tip-body="variant間に実装で説明できない乱高下があり、このセルでは勝因を断定しない。再測定で分散を確認する。" data-tip-doc="cell_reasons.json R9" data-tip-dot="bg-rose-400">R9</span></span>
   </div>
 </td>
 </tr>
 <tr class="hover:bg-indigo-50/10 transition-colors"><td class="py-3.5 px-4 font-bold text-slate-800 bg-slate-50/20">Get (Miss)</td>
-<td class="py-3.5 px-4 transition-colors">
+<td class="py-3.5 px-4 transition-colors" data-reasons="R2">
   <div class="flex flex-col gap-0.5">
     <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] border bg-emerald-600 text-white border-transparent shadow-sm font-bold  w-fit">
       ✅ WIN (2.22x)
     </span>
     <span class="text-[11px] text-slate-500 font-medium">vmemkv (+BF)</span>
-    <span class="text-[10px] text-slate-400">vs RocksDB</span><span class="flex flex-wrap gap-1 mt-1"><span class="reason-badge inline-flex items-center px-1 py-0.5 rounded text-[10px] border bg-amber-50 text-amber-700 border-amber-200 font-bold cursor-help" tabindex="0" data-tip-title="R2 [O] Bloom filter" data-tip-body="sorted_regionのmissをO(1)で打ち切り、T2への不要なランダムリードを回避する。Get_Missの主因。" data-tip-doc="docs/specification/low_level_design.md 7.3" data-tip-dot="bg-amber-400">R2</span></span>
+    <span class="text-[10px] text-slate-400">vs RocksDB</span><span class="flex flex-wrap gap-1 mt-1"><span class="reason-badge inline-flex items-center px-1 py-0.5 rounded text-[10px] border bg-amber-50 text-amber-700 border-amber-200 font-bold cursor-help" tabindex="0" data-rid="R2" data-hl="#fef3c7" data-tip-title="R2 [O] Bloom filter" data-tip-body="sorted_regionのmissをO(1)で打ち切り、T2への不要なランダムリードを回避する。Get_Missの主因。" data-tip-doc="docs/specification/low_level_design.md 7.3" data-tip-dot="bg-amber-400">R2</span></span>
   </div>
 </td>
-<td class="py-3.5 px-4 transition-colors">
+<td class="py-3.5 px-4 transition-colors" data-reasons="R2">
   <div class="flex flex-col gap-0.5">
     <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] border bg-emerald-600 text-white border-transparent shadow-sm font-bold  w-fit">
       ✅ WIN (2.44x)
     </span>
     <span class="text-[11px] text-slate-500 font-medium">vmemkv (+BF)</span>
-    <span class="text-[10px] text-slate-400">vs LMDB</span><span class="flex flex-wrap gap-1 mt-1"><span class="reason-badge inline-flex items-center px-1 py-0.5 rounded text-[10px] border bg-amber-50 text-amber-700 border-amber-200 font-bold cursor-help" tabindex="0" data-tip-title="R2 [O] Bloom filter" data-tip-body="sorted_regionのmissをO(1)で打ち切り、T2への不要なランダムリードを回避する。Get_Missの主因。" data-tip-doc="docs/specification/low_level_design.md 7.3" data-tip-dot="bg-amber-400">R2</span></span>
+    <span class="text-[10px] text-slate-400">vs LMDB</span><span class="flex flex-wrap gap-1 mt-1"><span class="reason-badge inline-flex items-center px-1 py-0.5 rounded text-[10px] border bg-amber-50 text-amber-700 border-amber-200 font-bold cursor-help" tabindex="0" data-rid="R2" data-hl="#fef3c7" data-tip-title="R2 [O] Bloom filter" data-tip-body="sorted_regionのmissをO(1)で打ち切り、T2への不要なランダムリードを回避する。Get_Missの主因。" data-tip-doc="docs/specification/low_level_design.md 7.3" data-tip-dot="bg-amber-400">R2</span></span>
   </div>
 </td>
-<td class="py-3.5 px-4 transition-colors">
+<td class="py-3.5 px-4 transition-colors" data-reasons="R2 R3">
   <div class="flex flex-col gap-0.5">
     <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] border bg-emerald-600 text-white border-transparent shadow-sm font-bold  w-fit">
       ✅ WIN (2.35x)
     </span>
     <span class="text-[11px] text-slate-500 font-medium">vmemkv (+PinRandom, +PinSeq 同着)</span>
-    <span class="text-[10px] text-slate-400">vs LMDB</span><span class="flex flex-wrap gap-1 mt-1"><span class="reason-badge inline-flex items-center px-1 py-0.5 rounded text-[10px] border bg-amber-50 text-amber-700 border-amber-200 font-bold cursor-help" tabindex="0" data-tip-title="R2 [O] Bloom filter" data-tip-body="sorted_regionのmissをO(1)で打ち切り、T2への不要なランダムリードを回避する。Get_Missの主因。" data-tip-doc="docs/specification/low_level_design.md 7.3" data-tip-dot="bg-amber-400">R2</span><span class="reason-badge inline-flex items-center px-1 py-0.5 rounded text-[10px] border bg-sky-50 text-sky-700 border-sky-200 font-bold cursor-help" tabindex="0" data-tip-title="R3 [O] base/tail trifecta read policy" data-tip-body="base領域をレコードサイズ・reader別に読む(主mmap / sequential mmap / pread+mincore)。LTMのScan・大レコードGetの主因。+PinSeq/+PinRandomはそのablation。trifecta自体は常時有効のため、この表からの分離は不可で根拠は過去の測定文書による。" data-tip-doc="docs/specification/low_level_design.md 7.5, docs/benchmark/20260807_scan_t2_base_tail_io_uring_read.md, docs/benchmark/20260810_get_base_mmap_fast_path.md" data-tip-dot="bg-sky-400">R3</span></span>
+    <span class="text-[10px] text-slate-400">vs LMDB</span><span class="flex flex-wrap gap-1 mt-1"><span class="reason-badge inline-flex items-center px-1 py-0.5 rounded text-[10px] border bg-amber-50 text-amber-700 border-amber-200 font-bold cursor-help" tabindex="0" data-rid="R2" data-hl="#fef3c7" data-tip-title="R2 [O] Bloom filter" data-tip-body="sorted_regionのmissをO(1)で打ち切り、T2への不要なランダムリードを回避する。Get_Missの主因。" data-tip-doc="docs/specification/low_level_design.md 7.3" data-tip-dot="bg-amber-400">R2</span><span class="reason-badge inline-flex items-center px-1 py-0.5 rounded text-[10px] border bg-sky-50 text-sky-700 border-sky-200 font-bold cursor-help" tabindex="0" data-rid="R3" data-hl="#e0f2fe" data-tip-title="R3 [O] base/tail trifecta read policy" data-tip-body="base領域をレコードサイズ・reader別に読む(主mmap / sequential mmap / pread+mincore)。LTMのScan・大レコードGetの主因。+PinSeq/+PinRandomはそのablation。trifecta自体は常時有効のため、この表からの分離は不可で根拠は過去の測定文書による。" data-tip-doc="docs/specification/low_level_design.md 7.5, docs/benchmark/20260807_scan_t2_base_tail_io_uring_read.md, docs/benchmark/20260810_get_base_mmap_fast_path.md" data-tip-dot="bg-sky-400">R3</span></span>
   </div>
 </td>
-<td class="py-3.5 px-4 transition-colors">
+<td class="py-3.5 px-4 transition-colors" data-reasons="R2 R3">
   <div class="flex flex-col gap-0.5">
     <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] border bg-emerald-600 text-white border-transparent shadow-sm font-bold  w-fit">
       ✅ WIN (2.07x)
     </span>
     <span class="text-[11px] text-slate-500 font-medium">vmemkv (+BF, +PinSeq 同着)</span>
-    <span class="text-[10px] text-slate-400">vs LMDB</span><span class="flex flex-wrap gap-1 mt-1"><span class="reason-badge inline-flex items-center px-1 py-0.5 rounded text-[10px] border bg-amber-50 text-amber-700 border-amber-200 font-bold cursor-help" tabindex="0" data-tip-title="R2 [O] Bloom filter" data-tip-body="sorted_regionのmissをO(1)で打ち切り、T2への不要なランダムリードを回避する。Get_Missの主因。" data-tip-doc="docs/specification/low_level_design.md 7.3" data-tip-dot="bg-amber-400">R2</span><span class="reason-badge inline-flex items-center px-1 py-0.5 rounded text-[10px] border bg-sky-50 text-sky-700 border-sky-200 font-bold cursor-help" tabindex="0" data-tip-title="R3 [O] base/tail trifecta read policy" data-tip-body="base領域をレコードサイズ・reader別に読む(主mmap / sequential mmap / pread+mincore)。LTMのScan・大レコードGetの主因。+PinSeq/+PinRandomはそのablation。trifecta自体は常時有効のため、この表からの分離は不可で根拠は過去の測定文書による。" data-tip-doc="docs/specification/low_level_design.md 7.5, docs/benchmark/20260807_scan_t2_base_tail_io_uring_read.md, docs/benchmark/20260810_get_base_mmap_fast_path.md" data-tip-dot="bg-sky-400">R3</span></span>
+    <span class="text-[10px] text-slate-400">vs LMDB</span><span class="flex flex-wrap gap-1 mt-1"><span class="reason-badge inline-flex items-center px-1 py-0.5 rounded text-[10px] border bg-amber-50 text-amber-700 border-amber-200 font-bold cursor-help" tabindex="0" data-rid="R2" data-hl="#fef3c7" data-tip-title="R2 [O] Bloom filter" data-tip-body="sorted_regionのmissをO(1)で打ち切り、T2への不要なランダムリードを回避する。Get_Missの主因。" data-tip-doc="docs/specification/low_level_design.md 7.3" data-tip-dot="bg-amber-400">R2</span><span class="reason-badge inline-flex items-center px-1 py-0.5 rounded text-[10px] border bg-sky-50 text-sky-700 border-sky-200 font-bold cursor-help" tabindex="0" data-rid="R3" data-hl="#e0f2fe" data-tip-title="R3 [O] base/tail trifecta read policy" data-tip-body="base領域をレコードサイズ・reader別に読む(主mmap / sequential mmap / pread+mincore)。LTMのScan・大レコードGetの主因。+PinSeq/+PinRandomはそのablation。trifecta自体は常時有効のため、この表からの分離は不可で根拠は過去の測定文書による。" data-tip-doc="docs/specification/low_level_design.md 7.5, docs/benchmark/20260807_scan_t2_base_tail_io_uring_read.md, docs/benchmark/20260810_get_base_mmap_fast_path.md" data-tip-dot="bg-sky-400">R3</span></span>
   </div>
 </td>
 </tr>
 <tr class="hover:bg-indigo-50/10 transition-colors"><td class="py-3.5 px-4 font-bold text-slate-800 bg-slate-50/20">Get (Hit, Zipf)</td>
-<td class="py-3.5 px-4 transition-colors">
+<td class="py-3.5 px-4 transition-colors" data-reasons="R8">
   <div class="flex flex-col gap-0.5">
     <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] border bg-emerald-600 text-white border-transparent shadow-sm font-bold  w-fit">
       ✅ WIN (1.39x)
     </span>
     <span class="text-[11px] text-slate-500 font-medium">vmemkv (Baseline)</span>
-    <span class="text-[10px] text-slate-400">vs LMDB</span><span class="flex flex-wrap gap-1 mt-1"><span class="reason-badge inline-flex items-center px-1 py-0.5 rounded text-[10px] border bg-slate-100 text-slate-600 border-slate-200 font-bold cursor-help" tabindex="0" data-tip-title="R8 [A] T1 two-region lookup + T2 direct mmap" data-tip-body="Get_HitはT1のO(1)+O(log N)探索とT2 file-mmap直接読みで完結する。Baseline勝利セルは最適化ではなくこの地力による。" data-tip-doc="docs/specification/low_level_design.md 3.1" data-tip-dot="bg-slate-400">R8</span></span>
+    <span class="text-[10px] text-slate-400">vs LMDB</span><span class="flex flex-wrap gap-1 mt-1"><span class="reason-badge inline-flex items-center px-1 py-0.5 rounded text-[10px] border bg-slate-100 text-slate-600 border-slate-200 font-bold cursor-help" tabindex="0" data-rid="R8" data-hl="#e2e8f0" data-tip-title="R8 [A] T1 two-region lookup + T2 direct mmap" data-tip-body="Get_HitはT1のO(1)+O(log N)探索とT2 file-mmap直接読みで完結する。Baseline勝利セルは最適化ではなくこの地力による。" data-tip-doc="docs/specification/low_level_design.md 3.1" data-tip-dot="bg-slate-400">R8</span></span>
   </div>
 </td>
-<td class="py-3.5 px-4 transition-colors">
+<td class="py-3.5 px-4 transition-colors" data-reasons="R8">
   <div class="flex flex-col gap-0.5">
     <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] border bg-emerald-600 text-white border-transparent shadow-sm font-bold  w-fit">
       ✅ WIN (1.22x)
     </span>
     <span class="text-[11px] text-slate-500 font-medium">vmemkv (Baseline)</span>
-    <span class="text-[10px] text-slate-400">vs LMDB</span><span class="flex flex-wrap gap-1 mt-1"><span class="reason-badge inline-flex items-center px-1 py-0.5 rounded text-[10px] border bg-slate-100 text-slate-600 border-slate-200 font-bold cursor-help" tabindex="0" data-tip-title="R8 [A] T1 two-region lookup + T2 direct mmap" data-tip-body="Get_HitはT1のO(1)+O(log N)探索とT2 file-mmap直接読みで完結する。Baseline勝利セルは最適化ではなくこの地力による。" data-tip-doc="docs/specification/low_level_design.md 3.1" data-tip-dot="bg-slate-400">R8</span></span>
+    <span class="text-[10px] text-slate-400">vs LMDB</span><span class="flex flex-wrap gap-1 mt-1"><span class="reason-badge inline-flex items-center px-1 py-0.5 rounded text-[10px] border bg-slate-100 text-slate-600 border-slate-200 font-bold cursor-help" tabindex="0" data-rid="R8" data-hl="#e2e8f0" data-tip-title="R8 [A] T1 two-region lookup + T2 direct mmap" data-tip-body="Get_HitはT1のO(1)+O(log N)探索とT2 file-mmap直接読みで完結する。Baseline勝利セルは最適化ではなくこの地力による。" data-tip-doc="docs/specification/low_level_design.md 3.1" data-tip-dot="bg-slate-400">R8</span></span>
   </div>
 </td>
-<td class="py-3.5 px-4 transition-colors">
+<td class="py-3.5 px-4 transition-colors" data-reasons="R8 R3">
   <div class="flex flex-col gap-0.5">
     <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] border bg-slate-100 text-slate-600 border-slate-200 font-bold  w-fit">
       ≈ EVEN (0.99x)
     </span>
     <span class="text-[11px] text-slate-500 font-medium">vmemkv (+Inline, +PinRandom 同着)</span>
-    <span class="text-[10px] text-slate-400">vs RocksDB-BlobDB</span><span class="flex flex-wrap gap-1 mt-1"><span class="reason-badge inline-flex items-center px-1 py-0.5 rounded text-[10px] border bg-slate-100 text-slate-600 border-slate-200 font-bold cursor-help" tabindex="0" data-tip-title="R8 [A] T1 two-region lookup + T2 direct mmap" data-tip-body="Get_HitはT1のO(1)+O(log N)探索とT2 file-mmap直接読みで完結する。Baseline勝利セルは最適化ではなくこの地力による。" data-tip-doc="docs/specification/low_level_design.md 3.1" data-tip-dot="bg-slate-400">R8</span><span class="reason-badge inline-flex items-center px-1 py-0.5 rounded text-[10px] border bg-sky-50 text-sky-700 border-sky-200 font-bold cursor-help" tabindex="0" data-tip-title="R3 [O] base/tail trifecta read policy" data-tip-body="base領域をレコードサイズ・reader別に読む(主mmap / sequential mmap / pread+mincore)。LTMのScan・大レコードGetの主因。+PinSeq/+PinRandomはそのablation。trifecta自体は常時有効のため、この表からの分離は不可で根拠は過去の測定文書による。" data-tip-doc="docs/specification/low_level_design.md 7.5, docs/benchmark/20260807_scan_t2_base_tail_io_uring_read.md, docs/benchmark/20260810_get_base_mmap_fast_path.md" data-tip-dot="bg-sky-400">R3</span></span>
+    <span class="text-[10px] text-slate-400">vs RocksDB-BlobDB</span><span class="flex flex-wrap gap-1 mt-1"><span class="reason-badge inline-flex items-center px-1 py-0.5 rounded text-[10px] border bg-slate-100 text-slate-600 border-slate-200 font-bold cursor-help" tabindex="0" data-rid="R8" data-hl="#e2e8f0" data-tip-title="R8 [A] T1 two-region lookup + T2 direct mmap" data-tip-body="Get_HitはT1のO(1)+O(log N)探索とT2 file-mmap直接読みで完結する。Baseline勝利セルは最適化ではなくこの地力による。" data-tip-doc="docs/specification/low_level_design.md 3.1" data-tip-dot="bg-slate-400">R8</span><span class="reason-badge inline-flex items-center px-1 py-0.5 rounded text-[10px] border bg-sky-50 text-sky-700 border-sky-200 font-bold cursor-help" tabindex="0" data-rid="R3" data-hl="#e0f2fe" data-tip-title="R3 [O] base/tail trifecta read policy" data-tip-body="base領域をレコードサイズ・reader別に読む(主mmap / sequential mmap / pread+mincore)。LTMのScan・大レコードGetの主因。+PinSeq/+PinRandomはそのablation。trifecta自体は常時有効のため、この表からの分離は不可で根拠は過去の測定文書による。" data-tip-doc="docs/specification/low_level_design.md 7.5, docs/benchmark/20260807_scan_t2_base_tail_io_uring_read.md, docs/benchmark/20260810_get_base_mmap_fast_path.md" data-tip-dot="bg-sky-400">R3</span></span>
   </div>
 </td>
-<td class="py-3.5 px-4 transition-colors">
+<td class="py-3.5 px-4 transition-colors" data-reasons="R8 R1">
   <div class="flex flex-col gap-0.5">
     <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] border bg-emerald-50 text-emerald-700 border-emerald-200 font-bold  w-fit">
       WIN (1.07x)
     </span>
     <span class="text-[11px] text-slate-500 font-medium">vmemkv (+Inline)</span>
-    <span class="text-[10px] text-slate-400">vs RocksDB</span><span class="flex flex-wrap gap-1 mt-1"><span class="reason-badge inline-flex items-center px-1 py-0.5 rounded text-[10px] border bg-slate-100 text-slate-600 border-slate-200 font-bold cursor-help" tabindex="0" data-tip-title="R8 [A] T1 two-region lookup + T2 direct mmap" data-tip-body="Get_HitはT1のO(1)+O(log N)探索とT2 file-mmap直接読みで完結する。Baseline勝利セルは最適化ではなくこの地力による。" data-tip-doc="docs/specification/low_level_design.md 3.1" data-tip-dot="bg-slate-400">R8</span><span class="reason-badge inline-flex items-center px-1 py-0.5 rounded text-[10px] border bg-indigo-50 text-indigo-700 border-indigo-200 font-bold cursor-help" tabindex="0" data-tip-title="R1 [O] T1 Inline Value" data-tip-body="8バイト以下の値はT2をバイパスしT1 payloadに格納する。8Bシナリオと混在コーパスの8B分を底上げする。" data-tip-doc="docs/specification/low_level_design.md 7.2" data-tip-dot="bg-indigo-400">R1</span></span>
+    <span class="text-[10px] text-slate-400">vs RocksDB</span><span class="flex flex-wrap gap-1 mt-1"><span class="reason-badge inline-flex items-center px-1 py-0.5 rounded text-[10px] border bg-slate-100 text-slate-600 border-slate-200 font-bold cursor-help" tabindex="0" data-rid="R8" data-hl="#e2e8f0" data-tip-title="R8 [A] T1 two-region lookup + T2 direct mmap" data-tip-body="Get_HitはT1のO(1)+O(log N)探索とT2 file-mmap直接読みで完結する。Baseline勝利セルは最適化ではなくこの地力による。" data-tip-doc="docs/specification/low_level_design.md 3.1" data-tip-dot="bg-slate-400">R8</span><span class="reason-badge inline-flex items-center px-1 py-0.5 rounded text-[10px] border bg-indigo-50 text-indigo-700 border-indigo-200 font-bold cursor-help" tabindex="0" data-rid="R1" data-hl="#e0e7ff" data-tip-title="R1 [O] T1 Inline Value" data-tip-body="8バイト以下の値はT2をバイパスしT1 payloadに格納する。8Bシナリオと混在コーパスの8B分を底上げする。" data-tip-doc="docs/specification/low_level_design.md 7.2" data-tip-dot="bg-indigo-400">R1</span></span>
   </div>
 </td>
 </tr>
 <tr class="hover:bg-indigo-50/10 transition-colors"><td class="py-3.5 px-4 font-bold text-slate-800 bg-slate-50/20">Get (Hit, Uniform)</td>
-<td class="py-3.5 px-4 transition-colors">
+<td class="py-3.5 px-4 transition-colors" data-reasons="R8">
   <div class="flex flex-col gap-0.5">
     <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] border bg-emerald-50 text-emerald-700 border-emerald-200 font-bold  w-fit">
       WIN (1.09x)
     </span>
     <span class="text-[11px] text-slate-500 font-medium">vmemkv (Baseline)</span>
-    <span class="text-[10px] text-slate-400">vs LMDB</span><span class="flex flex-wrap gap-1 mt-1"><span class="reason-badge inline-flex items-center px-1 py-0.5 rounded text-[10px] border bg-slate-100 text-slate-600 border-slate-200 font-bold cursor-help" tabindex="0" data-tip-title="R8 [A] T1 two-region lookup + T2 direct mmap" data-tip-body="Get_HitはT1のO(1)+O(log N)探索とT2 file-mmap直接読みで完結する。Baseline勝利セルは最適化ではなくこの地力による。" data-tip-doc="docs/specification/low_level_design.md 3.1" data-tip-dot="bg-slate-400">R8</span></span>
+    <span class="text-[10px] text-slate-400">vs LMDB</span><span class="flex flex-wrap gap-1 mt-1"><span class="reason-badge inline-flex items-center px-1 py-0.5 rounded text-[10px] border bg-slate-100 text-slate-600 border-slate-200 font-bold cursor-help" tabindex="0" data-rid="R8" data-hl="#e2e8f0" data-tip-title="R8 [A] T1 two-region lookup + T2 direct mmap" data-tip-body="Get_HitはT1のO(1)+O(log N)探索とT2 file-mmap直接読みで完結する。Baseline勝利セルは最適化ではなくこの地力による。" data-tip-doc="docs/specification/low_level_design.md 3.1" data-tip-dot="bg-slate-400">R8</span></span>
   </div>
 </td>
-<td class="py-3.5 px-4 transition-colors">
+<td class="py-3.5 px-4 transition-colors" data-reasons="R8">
   <div class="flex flex-col gap-0.5">
     <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] border bg-emerald-600 text-white border-transparent shadow-sm font-bold  w-fit">
       ✅ WIN (1.18x)
     </span>
     <span class="text-[11px] text-slate-500 font-medium">vmemkv (Baseline)</span>
-    <span class="text-[10px] text-slate-400">vs LMDB</span><span class="flex flex-wrap gap-1 mt-1"><span class="reason-badge inline-flex items-center px-1 py-0.5 rounded text-[10px] border bg-slate-100 text-slate-600 border-slate-200 font-bold cursor-help" tabindex="0" data-tip-title="R8 [A] T1 two-region lookup + T2 direct mmap" data-tip-body="Get_HitはT1のO(1)+O(log N)探索とT2 file-mmap直接読みで完結する。Baseline勝利セルは最適化ではなくこの地力による。" data-tip-doc="docs/specification/low_level_design.md 3.1" data-tip-dot="bg-slate-400">R8</span></span>
+    <span class="text-[10px] text-slate-400">vs LMDB</span><span class="flex flex-wrap gap-1 mt-1"><span class="reason-badge inline-flex items-center px-1 py-0.5 rounded text-[10px] border bg-slate-100 text-slate-600 border-slate-200 font-bold cursor-help" tabindex="0" data-rid="R8" data-hl="#e2e8f0" data-tip-title="R8 [A] T1 two-region lookup + T2 direct mmap" data-tip-body="Get_HitはT1のO(1)+O(log N)探索とT2 file-mmap直接読みで完結する。Baseline勝利セルは最適化ではなくこの地力による。" data-tip-doc="docs/specification/low_level_design.md 3.1" data-tip-dot="bg-slate-400">R8</span></span>
   </div>
 </td>
-<td class="py-3.5 px-4 transition-colors">
+<td class="py-3.5 px-4 transition-colors" data-reasons="R8 R1">
   <div class="flex flex-col gap-0.5">
     <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] border bg-emerald-50 text-emerald-700 border-emerald-200 font-bold  w-fit">
       WIN (1.07x)
     </span>
     <span class="text-[11px] text-slate-500 font-medium">vmemkv (+Inline, +PinRandom 同着)</span>
-    <span class="text-[10px] text-slate-400">vs RocksDB-BlobDB</span><span class="flex flex-wrap gap-1 mt-1"><span class="reason-badge inline-flex items-center px-1 py-0.5 rounded text-[10px] border bg-slate-100 text-slate-600 border-slate-200 font-bold cursor-help" tabindex="0" data-tip-title="R8 [A] T1 two-region lookup + T2 direct mmap" data-tip-body="Get_HitはT1のO(1)+O(log N)探索とT2 file-mmap直接読みで完結する。Baseline勝利セルは最適化ではなくこの地力による。" data-tip-doc="docs/specification/low_level_design.md 3.1" data-tip-dot="bg-slate-400">R8</span><span class="reason-badge inline-flex items-center px-1 py-0.5 rounded text-[10px] border bg-indigo-50 text-indigo-700 border-indigo-200 font-bold cursor-help" tabindex="0" data-tip-title="R1 [O] T1 Inline Value" data-tip-body="8バイト以下の値はT2をバイパスしT1 payloadに格納する。8Bシナリオと混在コーパスの8B分を底上げする。" data-tip-doc="docs/specification/low_level_design.md 7.2" data-tip-dot="bg-indigo-400">R1</span></span>
+    <span class="text-[10px] text-slate-400">vs RocksDB-BlobDB</span><span class="flex flex-wrap gap-1 mt-1"><span class="reason-badge inline-flex items-center px-1 py-0.5 rounded text-[10px] border bg-slate-100 text-slate-600 border-slate-200 font-bold cursor-help" tabindex="0" data-rid="R8" data-hl="#e2e8f0" data-tip-title="R8 [A] T1 two-region lookup + T2 direct mmap" data-tip-body="Get_HitはT1のO(1)+O(log N)探索とT2 file-mmap直接読みで完結する。Baseline勝利セルは最適化ではなくこの地力による。" data-tip-doc="docs/specification/low_level_design.md 3.1" data-tip-dot="bg-slate-400">R8</span><span class="reason-badge inline-flex items-center px-1 py-0.5 rounded text-[10px] border bg-indigo-50 text-indigo-700 border-indigo-200 font-bold cursor-help" tabindex="0" data-rid="R1" data-hl="#e0e7ff" data-tip-title="R1 [O] T1 Inline Value" data-tip-body="8バイト以下の値はT2をバイパスしT1 payloadに格納する。8Bシナリオと混在コーパスの8B分を底上げする。" data-tip-doc="docs/specification/low_level_design.md 7.2" data-tip-dot="bg-indigo-400">R1</span></span>
   </div>
 </td>
-<td class="py-3.5 px-4 transition-colors">
+<td class="py-3.5 px-4 transition-colors" data-reasons="R8 R3">
   <div class="flex flex-col gap-0.5">
     <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] border bg-slate-100 text-slate-600 border-slate-200 font-bold  w-fit">
       ≈ EVEN (0.97x)
     </span>
     <span class="text-[11px] text-slate-500 font-medium">vmemkv (+Inline)</span>
-    <span class="text-[10px] text-slate-400">vs RocksDB-BlobDB</span><span class="flex flex-wrap gap-1 mt-1"><span class="reason-badge inline-flex items-center px-1 py-0.5 rounded text-[10px] border bg-slate-100 text-slate-600 border-slate-200 font-bold cursor-help" tabindex="0" data-tip-title="R8 [A] T1 two-region lookup + T2 direct mmap" data-tip-body="Get_HitはT1のO(1)+O(log N)探索とT2 file-mmap直接読みで完結する。Baseline勝利セルは最適化ではなくこの地力による。" data-tip-doc="docs/specification/low_level_design.md 3.1" data-tip-dot="bg-slate-400">R8</span><span class="reason-badge inline-flex items-center px-1 py-0.5 rounded text-[10px] border bg-sky-50 text-sky-700 border-sky-200 font-bold cursor-help" tabindex="0" data-tip-title="R3 [O] base/tail trifecta read policy" data-tip-body="base領域をレコードサイズ・reader別に読む(主mmap / sequential mmap / pread+mincore)。LTMのScan・大レコードGetの主因。+PinSeq/+PinRandomはそのablation。trifecta自体は常時有効のため、この表からの分離は不可で根拠は過去の測定文書による。" data-tip-doc="docs/specification/low_level_design.md 7.5, docs/benchmark/20260807_scan_t2_base_tail_io_uring_read.md, docs/benchmark/20260810_get_base_mmap_fast_path.md" data-tip-dot="bg-sky-400">R3</span></span>
+    <span class="text-[10px] text-slate-400">vs RocksDB-BlobDB</span><span class="flex flex-wrap gap-1 mt-1"><span class="reason-badge inline-flex items-center px-1 py-0.5 rounded text-[10px] border bg-slate-100 text-slate-600 border-slate-200 font-bold cursor-help" tabindex="0" data-rid="R8" data-hl="#e2e8f0" data-tip-title="R8 [A] T1 two-region lookup + T2 direct mmap" data-tip-body="Get_HitはT1のO(1)+O(log N)探索とT2 file-mmap直接読みで完結する。Baseline勝利セルは最適化ではなくこの地力による。" data-tip-doc="docs/specification/low_level_design.md 3.1" data-tip-dot="bg-slate-400">R8</span><span class="reason-badge inline-flex items-center px-1 py-0.5 rounded text-[10px] border bg-sky-50 text-sky-700 border-sky-200 font-bold cursor-help" tabindex="0" data-rid="R3" data-hl="#e0f2fe" data-tip-title="R3 [O] base/tail trifecta read policy" data-tip-body="base領域をレコードサイズ・reader別に読む(主mmap / sequential mmap / pread+mincore)。LTMのScan・大レコードGetの主因。+PinSeq/+PinRandomはそのablation。trifecta自体は常時有効のため、この表からの分離は不可で根拠は過去の測定文書による。" data-tip-doc="docs/specification/low_level_design.md 7.5, docs/benchmark/20260807_scan_t2_base_tail_io_uring_read.md, docs/benchmark/20260810_get_base_mmap_fast_path.md" data-tip-dot="bg-sky-400">R3</span></span>
   </div>
 </td>
 </tr>
 <tr class="hover:bg-indigo-50/10 transition-colors"><td class="py-3.5 px-4 font-bold text-slate-800 bg-slate-50/20">Scan (Zipf)</td>
-<td class="py-3.5 px-4 transition-colors">
+<td class="py-3.5 px-4 transition-colors" data-reasons="R7 R1">
   <div class="flex flex-col gap-0.5">
     <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] border bg-emerald-600 text-white border-transparent shadow-sm font-bold  w-fit">
       ✅ WIN (1.15x)
     </span>
     <span class="text-[11px] text-slate-500 font-medium">vmemkv (+Inline)</span>
-    <span class="text-[10px] text-slate-400">vs LMDB</span><span class="flex flex-wrap gap-1 mt-1"><span class="reason-badge inline-flex items-center px-1 py-0.5 rounded text-[10px] border bg-violet-50 text-violet-700 border-violet-200 font-bold cursor-help" tabindex="0" data-tip-title="R7 [A] Two-Region + sharded T1 background reorganize/split" data-tip-body="append→sortedの統合をシャード単位の背景処理で吸収し、Scan/YCSBの持続スループットを保つ。" data-tip-doc="docs/specification/high_level_design.md 3/6, low_level_design.md 4.2/4.6" data-tip-dot="bg-violet-400">R7</span><span class="reason-badge inline-flex items-center px-1 py-0.5 rounded text-[10px] border bg-indigo-50 text-indigo-700 border-indigo-200 font-bold cursor-help" tabindex="0" data-tip-title="R1 [O] T1 Inline Value" data-tip-body="8バイト以下の値はT2をバイパスしT1 payloadに格納する。8Bシナリオと混在コーパスの8B分を底上げする。" data-tip-doc="docs/specification/low_level_design.md 7.2" data-tip-dot="bg-indigo-400">R1</span></span>
+    <span class="text-[10px] text-slate-400">vs LMDB</span><span class="flex flex-wrap gap-1 mt-1"><span class="reason-badge inline-flex items-center px-1 py-0.5 rounded text-[10px] border bg-violet-50 text-violet-700 border-violet-200 font-bold cursor-help" tabindex="0" data-rid="R7" data-hl="#ede9fe" data-tip-title="R7 [A] Two-Region + sharded T1 background reorganize/split" data-tip-body="append→sortedの統合をシャード単位の背景処理で吸収し、Scan/YCSBの持続スループットを保つ。" data-tip-doc="docs/specification/high_level_design.md 3/6, low_level_design.md 4.2/4.6" data-tip-dot="bg-violet-400">R7</span><span class="reason-badge inline-flex items-center px-1 py-0.5 rounded text-[10px] border bg-indigo-50 text-indigo-700 border-indigo-200 font-bold cursor-help" tabindex="0" data-rid="R1" data-hl="#e0e7ff" data-tip-title="R1 [O] T1 Inline Value" data-tip-body="8バイト以下の値はT2をバイパスしT1 payloadに格納する。8Bシナリオと混在コーパスの8B分を底上げする。" data-tip-doc="docs/specification/low_level_design.md 7.2" data-tip-dot="bg-indigo-400">R1</span></span>
   </div>
 </td>
-<td class="py-3.5 px-4 transition-colors">
+<td class="py-3.5 px-4 transition-colors" data-reasons="R7">
   <div class="flex flex-col gap-0.5">
     <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] border bg-slate-100 text-slate-600 border-slate-200 font-bold  w-fit">
       ≈ EVEN (1.04x)
     </span>
     <span class="text-[11px] text-slate-500 font-medium">vmemkv (Baseline, +BF, +Inline 同着)</span>
-    <span class="text-[10px] text-slate-400">vs LMDB</span><span class="flex flex-wrap gap-1 mt-1"><span class="reason-badge inline-flex items-center px-1 py-0.5 rounded text-[10px] border bg-violet-50 text-violet-700 border-violet-200 font-bold cursor-help" tabindex="0" data-tip-title="R7 [A] Two-Region + sharded T1 background reorganize/split" data-tip-body="append→sortedの統合をシャード単位の背景処理で吸収し、Scan/YCSBの持続スループットを保つ。" data-tip-doc="docs/specification/high_level_design.md 3/6, low_level_design.md 4.2/4.6" data-tip-dot="bg-violet-400">R7</span></span>
+    <span class="text-[10px] text-slate-400">vs LMDB</span><span class="flex flex-wrap gap-1 mt-1"><span class="reason-badge inline-flex items-center px-1 py-0.5 rounded text-[10px] border bg-violet-50 text-violet-700 border-violet-200 font-bold cursor-help" tabindex="0" data-rid="R7" data-hl="#ede9fe" data-tip-title="R7 [A] Two-Region + sharded T1 background reorganize/split" data-tip-body="append→sortedの統合をシャード単位の背景処理で吸収し、Scan/YCSBの持続スループットを保つ。" data-tip-doc="docs/specification/high_level_design.md 3/6, low_level_design.md 4.2/4.6" data-tip-dot="bg-violet-400">R7</span></span>
   </div>
 </td>
-<td class="py-3.5 px-4 transition-colors">
+<td class="py-3.5 px-4 transition-colors" data-reasons="R7 R3">
   <div class="flex flex-col gap-0.5">
     <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] border bg-emerald-600 text-white border-transparent shadow-sm font-bold  w-fit">
       ✅ WIN (1.32x)
     </span>
     <span class="text-[11px] text-slate-500 font-medium">vmemkv (Baseline)</span>
-    <span class="text-[10px] text-slate-400">vs RocksDB</span><span class="flex flex-wrap gap-1 mt-1"><span class="reason-badge inline-flex items-center px-1 py-0.5 rounded text-[10px] border bg-violet-50 text-violet-700 border-violet-200 font-bold cursor-help" tabindex="0" data-tip-title="R7 [A] Two-Region + sharded T1 background reorganize/split" data-tip-body="append→sortedの統合をシャード単位の背景処理で吸収し、Scan/YCSBの持続スループットを保つ。" data-tip-doc="docs/specification/high_level_design.md 3/6, low_level_design.md 4.2/4.6" data-tip-dot="bg-violet-400">R7</span><span class="reason-badge inline-flex items-center px-1 py-0.5 rounded text-[10px] border bg-sky-50 text-sky-700 border-sky-200 font-bold cursor-help" tabindex="0" data-tip-title="R3 [O] base/tail trifecta read policy" data-tip-body="base領域をレコードサイズ・reader別に読む(主mmap / sequential mmap / pread+mincore)。LTMのScan・大レコードGetの主因。+PinSeq/+PinRandomはそのablation。trifecta自体は常時有効のため、この表からの分離は不可で根拠は過去の測定文書による。" data-tip-doc="docs/specification/low_level_design.md 7.5, docs/benchmark/20260807_scan_t2_base_tail_io_uring_read.md, docs/benchmark/20260810_get_base_mmap_fast_path.md" data-tip-dot="bg-sky-400">R3</span></span>
+    <span class="text-[10px] text-slate-400">vs RocksDB</span><span class="flex flex-wrap gap-1 mt-1"><span class="reason-badge inline-flex items-center px-1 py-0.5 rounded text-[10px] border bg-violet-50 text-violet-700 border-violet-200 font-bold cursor-help" tabindex="0" data-rid="R7" data-hl="#ede9fe" data-tip-title="R7 [A] Two-Region + sharded T1 background reorganize/split" data-tip-body="append→sortedの統合をシャード単位の背景処理で吸収し、Scan/YCSBの持続スループットを保つ。" data-tip-doc="docs/specification/high_level_design.md 3/6, low_level_design.md 4.2/4.6" data-tip-dot="bg-violet-400">R7</span><span class="reason-badge inline-flex items-center px-1 py-0.5 rounded text-[10px] border bg-sky-50 text-sky-700 border-sky-200 font-bold cursor-help" tabindex="0" data-rid="R3" data-hl="#e0f2fe" data-tip-title="R3 [O] base/tail trifecta read policy" data-tip-body="base領域をレコードサイズ・reader別に読む(主mmap / sequential mmap / pread+mincore)。LTMのScan・大レコードGetの主因。+PinSeq/+PinRandomはそのablation。trifecta自体は常時有効のため、この表からの分離は不可で根拠は過去の測定文書による。" data-tip-doc="docs/specification/low_level_design.md 7.5, docs/benchmark/20260807_scan_t2_base_tail_io_uring_read.md, docs/benchmark/20260810_get_base_mmap_fast_path.md" data-tip-dot="bg-sky-400">R3</span></span>
   </div>
 </td>
-<td class="py-3.5 px-4 transition-colors">
+<td class="py-3.5 px-4 transition-colors" data-reasons="R7 R3 R1">
   <div class="flex flex-col gap-0.5">
     <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] border bg-emerald-50 text-emerald-700 border-emerald-200 font-bold  w-fit">
       WIN (1.12x)
     </span>
     <span class="text-[11px] text-slate-500 font-medium">vmemkv (+Inline)</span>
-    <span class="text-[10px] text-slate-400">vs RocksDB</span><span class="flex flex-wrap gap-1 mt-1"><span class="reason-badge inline-flex items-center px-1 py-0.5 rounded text-[10px] border bg-violet-50 text-violet-700 border-violet-200 font-bold cursor-help" tabindex="0" data-tip-title="R7 [A] Two-Region + sharded T1 background reorganize/split" data-tip-body="append→sortedの統合をシャード単位の背景処理で吸収し、Scan/YCSBの持続スループットを保つ。" data-tip-doc="docs/specification/high_level_design.md 3/6, low_level_design.md 4.2/4.6" data-tip-dot="bg-violet-400">R7</span><span class="reason-badge inline-flex items-center px-1 py-0.5 rounded text-[10px] border bg-sky-50 text-sky-700 border-sky-200 font-bold cursor-help" tabindex="0" data-tip-title="R3 [O] base/tail trifecta read policy" data-tip-body="base領域をレコードサイズ・reader別に読む(主mmap / sequential mmap / pread+mincore)。LTMのScan・大レコードGetの主因。+PinSeq/+PinRandomはそのablation。trifecta自体は常時有効のため、この表からの分離は不可で根拠は過去の測定文書による。" data-tip-doc="docs/specification/low_level_design.md 7.5, docs/benchmark/20260807_scan_t2_base_tail_io_uring_read.md, docs/benchmark/20260810_get_base_mmap_fast_path.md" data-tip-dot="bg-sky-400">R3</span><span class="reason-badge inline-flex items-center px-1 py-0.5 rounded text-[10px] border bg-indigo-50 text-indigo-700 border-indigo-200 font-bold cursor-help" tabindex="0" data-tip-title="R1 [O] T1 Inline Value" data-tip-body="8バイト以下の値はT2をバイパスしT1 payloadに格納する。8Bシナリオと混在コーパスの8B分を底上げする。" data-tip-doc="docs/specification/low_level_design.md 7.2" data-tip-dot="bg-indigo-400">R1</span></span>
+    <span class="text-[10px] text-slate-400">vs RocksDB</span><span class="flex flex-wrap gap-1 mt-1"><span class="reason-badge inline-flex items-center px-1 py-0.5 rounded text-[10px] border bg-violet-50 text-violet-700 border-violet-200 font-bold cursor-help" tabindex="0" data-rid="R7" data-hl="#ede9fe" data-tip-title="R7 [A] Two-Region + sharded T1 background reorganize/split" data-tip-body="append→sortedの統合をシャード単位の背景処理で吸収し、Scan/YCSBの持続スループットを保つ。" data-tip-doc="docs/specification/high_level_design.md 3/6, low_level_design.md 4.2/4.6" data-tip-dot="bg-violet-400">R7</span><span class="reason-badge inline-flex items-center px-1 py-0.5 rounded text-[10px] border bg-sky-50 text-sky-700 border-sky-200 font-bold cursor-help" tabindex="0" data-rid="R3" data-hl="#e0f2fe" data-tip-title="R3 [O] base/tail trifecta read policy" data-tip-body="base領域をレコードサイズ・reader別に読む(主mmap / sequential mmap / pread+mincore)。LTMのScan・大レコードGetの主因。+PinSeq/+PinRandomはそのablation。trifecta自体は常時有効のため、この表からの分離は不可で根拠は過去の測定文書による。" data-tip-doc="docs/specification/low_level_design.md 7.5, docs/benchmark/20260807_scan_t2_base_tail_io_uring_read.md, docs/benchmark/20260810_get_base_mmap_fast_path.md" data-tip-dot="bg-sky-400">R3</span><span class="reason-badge inline-flex items-center px-1 py-0.5 rounded text-[10px] border bg-indigo-50 text-indigo-700 border-indigo-200 font-bold cursor-help" tabindex="0" data-rid="R1" data-hl="#e0e7ff" data-tip-title="R1 [O] T1 Inline Value" data-tip-body="8バイト以下の値はT2をバイパスしT1 payloadに格納する。8Bシナリオと混在コーパスの8B分を底上げする。" data-tip-doc="docs/specification/low_level_design.md 7.2" data-tip-dot="bg-indigo-400">R1</span></span>
   </div>
 </td>
 </tr>
 <tr class="hover:bg-indigo-50/10 transition-colors"><td class="py-3.5 px-4 font-bold text-slate-800 bg-slate-50/20">Scan (Uniform)</td>
-<td class="py-3.5 px-4 transition-colors">
+<td class="py-3.5 px-4 transition-colors" data-reasons="R7 R1">
   <div class="flex flex-col gap-0.5">
     <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] border bg-emerald-50 text-emerald-700 border-emerald-200 font-bold  w-fit">
       WIN (1.14x)
     </span>
     <span class="text-[11px] text-slate-500 font-medium">vmemkv (+Inline)</span>
-    <span class="text-[10px] text-slate-400">vs LMDB</span><span class="flex flex-wrap gap-1 mt-1"><span class="reason-badge inline-flex items-center px-1 py-0.5 rounded text-[10px] border bg-violet-50 text-violet-700 border-violet-200 font-bold cursor-help" tabindex="0" data-tip-title="R7 [A] Two-Region + sharded T1 background reorganize/split" data-tip-body="append→sortedの統合をシャード単位の背景処理で吸収し、Scan/YCSBの持続スループットを保つ。" data-tip-doc="docs/specification/high_level_design.md 3/6, low_level_design.md 4.2/4.6" data-tip-dot="bg-violet-400">R7</span><span class="reason-badge inline-flex items-center px-1 py-0.5 rounded text-[10px] border bg-indigo-50 text-indigo-700 border-indigo-200 font-bold cursor-help" tabindex="0" data-tip-title="R1 [O] T1 Inline Value" data-tip-body="8バイト以下の値はT2をバイパスしT1 payloadに格納する。8Bシナリオと混在コーパスの8B分を底上げする。" data-tip-doc="docs/specification/low_level_design.md 7.2" data-tip-dot="bg-indigo-400">R1</span></span>
+    <span class="text-[10px] text-slate-400">vs LMDB</span><span class="flex flex-wrap gap-1 mt-1"><span class="reason-badge inline-flex items-center px-1 py-0.5 rounded text-[10px] border bg-violet-50 text-violet-700 border-violet-200 font-bold cursor-help" tabindex="0" data-rid="R7" data-hl="#ede9fe" data-tip-title="R7 [A] Two-Region + sharded T1 background reorganize/split" data-tip-body="append→sortedの統合をシャード単位の背景処理で吸収し、Scan/YCSBの持続スループットを保つ。" data-tip-doc="docs/specification/high_level_design.md 3/6, low_level_design.md 4.2/4.6" data-tip-dot="bg-violet-400">R7</span><span class="reason-badge inline-flex items-center px-1 py-0.5 rounded text-[10px] border bg-indigo-50 text-indigo-700 border-indigo-200 font-bold cursor-help" tabindex="0" data-rid="R1" data-hl="#e0e7ff" data-tip-title="R1 [O] T1 Inline Value" data-tip-body="8バイト以下の値はT2をバイパスしT1 payloadに格納する。8Bシナリオと混在コーパスの8B分を底上げする。" data-tip-doc="docs/specification/low_level_design.md 7.2" data-tip-dot="bg-indigo-400">R1</span></span>
   </div>
 </td>
-<td class="py-3.5 px-4 transition-colors">
+<td class="py-3.5 px-4 transition-colors" data-reasons="R7">
   <div class="flex flex-col gap-0.5">
     <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] border bg-emerald-50 text-emerald-700 border-emerald-200 font-bold  w-fit">
       WIN (1.09x)
     </span>
     <span class="text-[11px] text-slate-500 font-medium">vmemkv (Baseline, +BF, +Inline 同着)</span>
-    <span class="text-[10px] text-slate-400">vs LMDB</span><span class="flex flex-wrap gap-1 mt-1"><span class="reason-badge inline-flex items-center px-1 py-0.5 rounded text-[10px] border bg-violet-50 text-violet-700 border-violet-200 font-bold cursor-help" tabindex="0" data-tip-title="R7 [A] Two-Region + sharded T1 background reorganize/split" data-tip-body="append→sortedの統合をシャード単位の背景処理で吸収し、Scan/YCSBの持続スループットを保つ。" data-tip-doc="docs/specification/high_level_design.md 3/6, low_level_design.md 4.2/4.6" data-tip-dot="bg-violet-400">R7</span></span>
+    <span class="text-[10px] text-slate-400">vs LMDB</span><span class="flex flex-wrap gap-1 mt-1"><span class="reason-badge inline-flex items-center px-1 py-0.5 rounded text-[10px] border bg-violet-50 text-violet-700 border-violet-200 font-bold cursor-help" tabindex="0" data-rid="R7" data-hl="#ede9fe" data-tip-title="R7 [A] Two-Region + sharded T1 background reorganize/split" data-tip-body="append→sortedの統合をシャード単位の背景処理で吸収し、Scan/YCSBの持続スループットを保つ。" data-tip-doc="docs/specification/high_level_design.md 3/6, low_level_design.md 4.2/4.6" data-tip-dot="bg-violet-400">R7</span></span>
   </div>
 </td>
-<td class="py-3.5 px-4 transition-colors">
+<td class="py-3.5 px-4 transition-colors" data-reasons="R7 R3">
   <div class="flex flex-col gap-0.5">
     <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] border bg-emerald-600 text-white border-transparent shadow-sm font-bold  w-fit">
       ✅ WIN (1.43x)
     </span>
     <span class="text-[11px] text-slate-500 font-medium">vmemkv (Baseline, +BF, +PinSeq 同着)</span>
-    <span class="text-[10px] text-slate-400">vs RocksDB</span><span class="flex flex-wrap gap-1 mt-1"><span class="reason-badge inline-flex items-center px-1 py-0.5 rounded text-[10px] border bg-violet-50 text-violet-700 border-violet-200 font-bold cursor-help" tabindex="0" data-tip-title="R7 [A] Two-Region + sharded T1 background reorganize/split" data-tip-body="append→sortedの統合をシャード単位の背景処理で吸収し、Scan/YCSBの持続スループットを保つ。" data-tip-doc="docs/specification/high_level_design.md 3/6, low_level_design.md 4.2/4.6" data-tip-dot="bg-violet-400">R7</span><span class="reason-badge inline-flex items-center px-1 py-0.5 rounded text-[10px] border bg-sky-50 text-sky-700 border-sky-200 font-bold cursor-help" tabindex="0" data-tip-title="R3 [O] base/tail trifecta read policy" data-tip-body="base領域をレコードサイズ・reader別に読む(主mmap / sequential mmap / pread+mincore)。LTMのScan・大レコードGetの主因。+PinSeq/+PinRandomはそのablation。trifecta自体は常時有効のため、この表からの分離は不可で根拠は過去の測定文書による。" data-tip-doc="docs/specification/low_level_design.md 7.5, docs/benchmark/20260807_scan_t2_base_tail_io_uring_read.md, docs/benchmark/20260810_get_base_mmap_fast_path.md" data-tip-dot="bg-sky-400">R3</span></span>
+    <span class="text-[10px] text-slate-400">vs RocksDB</span><span class="flex flex-wrap gap-1 mt-1"><span class="reason-badge inline-flex items-center px-1 py-0.5 rounded text-[10px] border bg-violet-50 text-violet-700 border-violet-200 font-bold cursor-help" tabindex="0" data-rid="R7" data-hl="#ede9fe" data-tip-title="R7 [A] Two-Region + sharded T1 background reorganize/split" data-tip-body="append→sortedの統合をシャード単位の背景処理で吸収し、Scan/YCSBの持続スループットを保つ。" data-tip-doc="docs/specification/high_level_design.md 3/6, low_level_design.md 4.2/4.6" data-tip-dot="bg-violet-400">R7</span><span class="reason-badge inline-flex items-center px-1 py-0.5 rounded text-[10px] border bg-sky-50 text-sky-700 border-sky-200 font-bold cursor-help" tabindex="0" data-rid="R3" data-hl="#e0f2fe" data-tip-title="R3 [O] base/tail trifecta read policy" data-tip-body="base領域をレコードサイズ・reader別に読む(主mmap / sequential mmap / pread+mincore)。LTMのScan・大レコードGetの主因。+PinSeq/+PinRandomはそのablation。trifecta自体は常時有効のため、この表からの分離は不可で根拠は過去の測定文書による。" data-tip-doc="docs/specification/low_level_design.md 7.5, docs/benchmark/20260807_scan_t2_base_tail_io_uring_read.md, docs/benchmark/20260810_get_base_mmap_fast_path.md" data-tip-dot="bg-sky-400">R3</span></span>
   </div>
 </td>
-<td class="py-3.5 px-4 transition-colors">
+<td class="py-3.5 px-4 transition-colors" data-reasons="R7 R3 R10">
   <div class="flex flex-col gap-0.5">
     <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] border bg-emerald-50 text-emerald-700 border-emerald-200 font-bold  w-fit">
       WIN (1.08x)
     </span>
     <span class="text-[11px] text-slate-500 font-medium">vmemkv (+Inline, +PinSeq 同着)</span>
-    <span class="text-[10px] text-slate-400">vs RocksDB-BlobDB</span><span class="flex flex-wrap gap-1 mt-1"><span class="reason-badge inline-flex items-center px-1 py-0.5 rounded text-[10px] border bg-violet-50 text-violet-700 border-violet-200 font-bold cursor-help" tabindex="0" data-tip-title="R7 [A] Two-Region + sharded T1 background reorganize/split" data-tip-body="append→sortedの統合をシャード単位の背景処理で吸収し、Scan/YCSBの持続スループットを保つ。" data-tip-doc="docs/specification/high_level_design.md 3/6, low_level_design.md 4.2/4.6" data-tip-dot="bg-violet-400">R7</span><span class="reason-badge inline-flex items-center px-1 py-0.5 rounded text-[10px] border bg-sky-50 text-sky-700 border-sky-200 font-bold cursor-help" tabindex="0" data-tip-title="R3 [O] base/tail trifecta read policy" data-tip-body="base領域をレコードサイズ・reader別に読む(主mmap / sequential mmap / pread+mincore)。LTMのScan・大レコードGetの主因。+PinSeq/+PinRandomはそのablation。trifecta自体は常時有効のため、この表からの分離は不可で根拠は過去の測定文書による。" data-tip-doc="docs/specification/low_level_design.md 7.5, docs/benchmark/20260807_scan_t2_base_tail_io_uring_read.md, docs/benchmark/20260810_get_base_mmap_fast_path.md" data-tip-dot="bg-sky-400">R3</span><span class="reason-badge inline-flex items-center px-1 py-0.5 rounded text-[10px] border bg-orange-50 text-orange-700 border-orange-200 font-bold cursor-help" tabindex="0" data-tip-title="R10 [?] 僅差(要再測定)" data-tip-body="全storeが団子で誤差と区別困難。WIN表示を残しつつ再測定対象とする。" data-tip-doc="cell_reasons.json R10" data-tip-dot="bg-orange-400">R10</span></span>
+    <span class="text-[10px] text-slate-400">vs RocksDB-BlobDB</span><span class="flex flex-wrap gap-1 mt-1"><span class="reason-badge inline-flex items-center px-1 py-0.5 rounded text-[10px] border bg-violet-50 text-violet-700 border-violet-200 font-bold cursor-help" tabindex="0" data-rid="R7" data-hl="#ede9fe" data-tip-title="R7 [A] Two-Region + sharded T1 background reorganize/split" data-tip-body="append→sortedの統合をシャード単位の背景処理で吸収し、Scan/YCSBの持続スループットを保つ。" data-tip-doc="docs/specification/high_level_design.md 3/6, low_level_design.md 4.2/4.6" data-tip-dot="bg-violet-400">R7</span><span class="reason-badge inline-flex items-center px-1 py-0.5 rounded text-[10px] border bg-sky-50 text-sky-700 border-sky-200 font-bold cursor-help" tabindex="0" data-rid="R3" data-hl="#e0f2fe" data-tip-title="R3 [O] base/tail trifecta read policy" data-tip-body="base領域をレコードサイズ・reader別に読む(主mmap / sequential mmap / pread+mincore)。LTMのScan・大レコードGetの主因。+PinSeq/+PinRandomはそのablation。trifecta自体は常時有効のため、この表からの分離は不可で根拠は過去の測定文書による。" data-tip-doc="docs/specification/low_level_design.md 7.5, docs/benchmark/20260807_scan_t2_base_tail_io_uring_read.md, docs/benchmark/20260810_get_base_mmap_fast_path.md" data-tip-dot="bg-sky-400">R3</span><span class="reason-badge inline-flex items-center px-1 py-0.5 rounded text-[10px] border bg-orange-50 text-orange-700 border-orange-200 font-bold cursor-help" tabindex="0" data-rid="R10" data-hl="#ffedd5" data-tip-title="R10 [?] 僅差(要再測定)" data-tip-body="全storeが団子で誤差と区別困難。WIN表示を残しつつ再測定対象とする。" data-tip-doc="cell_reasons.json R10" data-tip-dot="bg-orange-400">R10</span></span>
   </div>
 </td>
 </tr>
 <tr class="hover:bg-indigo-50/10 transition-colors"><td class="py-3.5 px-4 font-bold text-slate-800 bg-slate-50/20">YCSB-E</td>
-<td class="py-3.5 px-4 transition-colors">
+<td class="py-3.5 px-4 transition-colors" data-reasons="R7 R1">
   <div class="flex flex-col gap-0.5">
     <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] border bg-emerald-600 text-white border-transparent shadow-sm font-bold  w-fit">
       ✅ WIN (3.56x)
     </span>
     <span class="text-[11px] text-slate-500 font-medium">vmemkv (+Inline)</span>
-    <span class="text-[10px] text-slate-400">vs RocksDB-BlobDB</span><span class="flex flex-wrap gap-1 mt-1"><span class="reason-badge inline-flex items-center px-1 py-0.5 rounded text-[10px] border bg-violet-50 text-violet-700 border-violet-200 font-bold cursor-help" tabindex="0" data-tip-title="R7 [A] Two-Region + sharded T1 background reorganize/split" data-tip-body="append→sortedの統合をシャード単位の背景処理で吸収し、Scan/YCSBの持続スループットを保つ。" data-tip-doc="docs/specification/high_level_design.md 3/6, low_level_design.md 4.2/4.6" data-tip-dot="bg-violet-400">R7</span><span class="reason-badge inline-flex items-center px-1 py-0.5 rounded text-[10px] border bg-indigo-50 text-indigo-700 border-indigo-200 font-bold cursor-help" tabindex="0" data-tip-title="R1 [O] T1 Inline Value" data-tip-body="8バイト以下の値はT2をバイパスしT1 payloadに格納する。8Bシナリオと混在コーパスの8B分を底上げする。" data-tip-doc="docs/specification/low_level_design.md 7.2" data-tip-dot="bg-indigo-400">R1</span></span>
+    <span class="text-[10px] text-slate-400">vs RocksDB-BlobDB</span><span class="flex flex-wrap gap-1 mt-1"><span class="reason-badge inline-flex items-center px-1 py-0.5 rounded text-[10px] border bg-violet-50 text-violet-700 border-violet-200 font-bold cursor-help" tabindex="0" data-rid="R7" data-hl="#ede9fe" data-tip-title="R7 [A] Two-Region + sharded T1 background reorganize/split" data-tip-body="append→sortedの統合をシャード単位の背景処理で吸収し、Scan/YCSBの持続スループットを保つ。" data-tip-doc="docs/specification/high_level_design.md 3/6, low_level_design.md 4.2/4.6" data-tip-dot="bg-violet-400">R7</span><span class="reason-badge inline-flex items-center px-1 py-0.5 rounded text-[10px] border bg-indigo-50 text-indigo-700 border-indigo-200 font-bold cursor-help" tabindex="0" data-rid="R1" data-hl="#e0e7ff" data-tip-title="R1 [O] T1 Inline Value" data-tip-body="8バイト以下の値はT2をバイパスしT1 payloadに格納する。8Bシナリオと混在コーパスの8B分を底上げする。" data-tip-doc="docs/specification/low_level_design.md 7.2" data-tip-dot="bg-indigo-400">R1</span></span>
   </div>
 </td>
-<td class="py-3.5 px-4 transition-colors">
+<td class="py-3.5 px-4 transition-colors" data-reasons="R7">
   <div class="flex flex-col gap-0.5">
     <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] border bg-emerald-600 text-white border-transparent shadow-sm font-bold  w-fit">
       ✅ WIN (1.70x)
     </span>
     <span class="text-[11px] text-slate-500 font-medium">vmemkv (Baseline)</span>
-    <span class="text-[10px] text-slate-400">vs RocksDB</span><span class="flex flex-wrap gap-1 mt-1"><span class="reason-badge inline-flex items-center px-1 py-0.5 rounded text-[10px] border bg-violet-50 text-violet-700 border-violet-200 font-bold cursor-help" tabindex="0" data-tip-title="R7 [A] Two-Region + sharded T1 background reorganize/split" data-tip-body="append→sortedの統合をシャード単位の背景処理で吸収し、Scan/YCSBの持続スループットを保つ。" data-tip-doc="docs/specification/high_level_design.md 3/6, low_level_design.md 4.2/4.6" data-tip-dot="bg-violet-400">R7</span></span>
+    <span class="text-[10px] text-slate-400">vs RocksDB</span><span class="flex flex-wrap gap-1 mt-1"><span class="reason-badge inline-flex items-center px-1 py-0.5 rounded text-[10px] border bg-violet-50 text-violet-700 border-violet-200 font-bold cursor-help" tabindex="0" data-rid="R7" data-hl="#ede9fe" data-tip-title="R7 [A] Two-Region + sharded T1 background reorganize/split" data-tip-body="append→sortedの統合をシャード単位の背景処理で吸収し、Scan/YCSBの持続スループットを保つ。" data-tip-doc="docs/specification/high_level_design.md 3/6, low_level_design.md 4.2/4.6" data-tip-dot="bg-violet-400">R7</span></span>
   </div>
 </td>
-<td class="py-3.5 px-4 transition-colors">
+<td class="py-3.5 px-4 transition-colors" data-reasons="R7 R3">
   <div class="flex flex-col gap-0.5">
     <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] border bg-emerald-600 text-white border-transparent shadow-sm font-bold  w-fit">
       ✅ WIN (1.19x)
     </span>
     <span class="text-[11px] text-slate-500 font-medium">vmemkv (Baseline, +Inline, +PinSeq 同着)</span>
-    <span class="text-[10px] text-slate-400">vs RocksDB</span><span class="flex flex-wrap gap-1 mt-1"><span class="reason-badge inline-flex items-center px-1 py-0.5 rounded text-[10px] border bg-violet-50 text-violet-700 border-violet-200 font-bold cursor-help" tabindex="0" data-tip-title="R7 [A] Two-Region + sharded T1 background reorganize/split" data-tip-body="append→sortedの統合をシャード単位の背景処理で吸収し、Scan/YCSBの持続スループットを保つ。" data-tip-doc="docs/specification/high_level_design.md 3/6, low_level_design.md 4.2/4.6" data-tip-dot="bg-violet-400">R7</span><span class="reason-badge inline-flex items-center px-1 py-0.5 rounded text-[10px] border bg-sky-50 text-sky-700 border-sky-200 font-bold cursor-help" tabindex="0" data-tip-title="R3 [O] base/tail trifecta read policy" data-tip-body="base領域をレコードサイズ・reader別に読む(主mmap / sequential mmap / pread+mincore)。LTMのScan・大レコードGetの主因。+PinSeq/+PinRandomはそのablation。trifecta自体は常時有効のため、この表からの分離は不可で根拠は過去の測定文書による。" data-tip-doc="docs/specification/low_level_design.md 7.5, docs/benchmark/20260807_scan_t2_base_tail_io_uring_read.md, docs/benchmark/20260810_get_base_mmap_fast_path.md" data-tip-dot="bg-sky-400">R3</span></span>
+    <span class="text-[10px] text-slate-400">vs RocksDB</span><span class="flex flex-wrap gap-1 mt-1"><span class="reason-badge inline-flex items-center px-1 py-0.5 rounded text-[10px] border bg-violet-50 text-violet-700 border-violet-200 font-bold cursor-help" tabindex="0" data-rid="R7" data-hl="#ede9fe" data-tip-title="R7 [A] Two-Region + sharded T1 background reorganize/split" data-tip-body="append→sortedの統合をシャード単位の背景処理で吸収し、Scan/YCSBの持続スループットを保つ。" data-tip-doc="docs/specification/high_level_design.md 3/6, low_level_design.md 4.2/4.6" data-tip-dot="bg-violet-400">R7</span><span class="reason-badge inline-flex items-center px-1 py-0.5 rounded text-[10px] border bg-sky-50 text-sky-700 border-sky-200 font-bold cursor-help" tabindex="0" data-rid="R3" data-hl="#e0f2fe" data-tip-title="R3 [O] base/tail trifecta read policy" data-tip-body="base領域をレコードサイズ・reader別に読む(主mmap / sequential mmap / pread+mincore)。LTMのScan・大レコードGetの主因。+PinSeq/+PinRandomはそのablation。trifecta自体は常時有効のため、この表からの分離は不可で根拠は過去の測定文書による。" data-tip-doc="docs/specification/low_level_design.md 7.5, docs/benchmark/20260807_scan_t2_base_tail_io_uring_read.md, docs/benchmark/20260810_get_base_mmap_fast_path.md" data-tip-dot="bg-sky-400">R3</span></span>
   </div>
 </td>
-<td class="py-3.5 px-4 transition-colors">
+<td class="py-3.5 px-4 transition-colors" data-reasons="R7 R3 R10">
   <div class="flex flex-col gap-0.5">
     <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] border bg-emerald-50 text-emerald-700 border-emerald-200 font-bold  w-fit">
       WIN (1.06x)
     </span>
     <span class="text-[11px] text-slate-500 font-medium">vmemkv (Baseline)</span>
-    <span class="text-[10px] text-slate-400">vs RocksDB</span><span class="flex flex-wrap gap-1 mt-1"><span class="reason-badge inline-flex items-center px-1 py-0.5 rounded text-[10px] border bg-violet-50 text-violet-700 border-violet-200 font-bold cursor-help" tabindex="0" data-tip-title="R7 [A] Two-Region + sharded T1 background reorganize/split" data-tip-body="append→sortedの統合をシャード単位の背景処理で吸収し、Scan/YCSBの持続スループットを保つ。" data-tip-doc="docs/specification/high_level_design.md 3/6, low_level_design.md 4.2/4.6" data-tip-dot="bg-violet-400">R7</span><span class="reason-badge inline-flex items-center px-1 py-0.5 rounded text-[10px] border bg-sky-50 text-sky-700 border-sky-200 font-bold cursor-help" tabindex="0" data-tip-title="R3 [O] base/tail trifecta read policy" data-tip-body="base領域をレコードサイズ・reader別に読む(主mmap / sequential mmap / pread+mincore)。LTMのScan・大レコードGetの主因。+PinSeq/+PinRandomはそのablation。trifecta自体は常時有効のため、この表からの分離は不可で根拠は過去の測定文書による。" data-tip-doc="docs/specification/low_level_design.md 7.5, docs/benchmark/20260807_scan_t2_base_tail_io_uring_read.md, docs/benchmark/20260810_get_base_mmap_fast_path.md" data-tip-dot="bg-sky-400">R3</span><span class="reason-badge inline-flex items-center px-1 py-0.5 rounded text-[10px] border bg-orange-50 text-orange-700 border-orange-200 font-bold cursor-help" tabindex="0" data-tip-title="R10 [?] 僅差(要再測定)" data-tip-body="全storeが団子で誤差と区別困難。WIN表示を残しつつ再測定対象とする。" data-tip-doc="cell_reasons.json R10" data-tip-dot="bg-orange-400">R10</span></span>
+    <span class="text-[10px] text-slate-400">vs RocksDB</span><span class="flex flex-wrap gap-1 mt-1"><span class="reason-badge inline-flex items-center px-1 py-0.5 rounded text-[10px] border bg-violet-50 text-violet-700 border-violet-200 font-bold cursor-help" tabindex="0" data-rid="R7" data-hl="#ede9fe" data-tip-title="R7 [A] Two-Region + sharded T1 background reorganize/split" data-tip-body="append→sortedの統合をシャード単位の背景処理で吸収し、Scan/YCSBの持続スループットを保つ。" data-tip-doc="docs/specification/high_level_design.md 3/6, low_level_design.md 4.2/4.6" data-tip-dot="bg-violet-400">R7</span><span class="reason-badge inline-flex items-center px-1 py-0.5 rounded text-[10px] border bg-sky-50 text-sky-700 border-sky-200 font-bold cursor-help" tabindex="0" data-rid="R3" data-hl="#e0f2fe" data-tip-title="R3 [O] base/tail trifecta read policy" data-tip-body="base領域をレコードサイズ・reader別に読む(主mmap / sequential mmap / pread+mincore)。LTMのScan・大レコードGetの主因。+PinSeq/+PinRandomはそのablation。trifecta自体は常時有効のため、この表からの分離は不可で根拠は過去の測定文書による。" data-tip-doc="docs/specification/low_level_design.md 7.5, docs/benchmark/20260807_scan_t2_base_tail_io_uring_read.md, docs/benchmark/20260810_get_base_mmap_fast_path.md" data-tip-dot="bg-sky-400">R3</span><span class="reason-badge inline-flex items-center px-1 py-0.5 rounded text-[10px] border bg-orange-50 text-orange-700 border-orange-200 font-bold cursor-help" tabindex="0" data-rid="R10" data-hl="#ffedd5" data-tip-title="R10 [?] 僅差(要再測定)" data-tip-body="全storeが団子で誤差と区別困難。WIN表示を残しつつ再測定対象とする。" data-tip-doc="cell_reasons.json R10" data-tip-dot="bg-orange-400">R10</span></span>
   </div>
 </td>
 </tr>
@@ -471,18 +471,18 @@
         </div>
       <!-- cell-reasons-legend:start -->
         <div class="mt-4 border-t border-slate-100 pt-4">
-          <p class="text-xs font-bold text-slate-700 mb-1">Why each cell wins -- reason legend (hover or focus a badge)</p>
+          <p class="text-xs font-bold text-slate-700 mb-1">Why each cell wins -- reason legend (hover or focus a badge to highlight its cells)</p>
           <ul class="space-y-1 text-xs text-slate-500 list-disc pl-4">
-          <li><span class="inline-flex items-center px-1 py-0.5 rounded text-[10px] border bg-indigo-50 text-indigo-700 border-indigo-200 font-bold">R1</span> <strong>[O] T1 Inline Value</strong>: 8バイト以下の値はT2をバイパスしT1 payloadに格納する。8Bシナリオと混在コーパスの8B分を底上げする。 <span class="text-slate-400">(docs/specification/low_level_design.md 7.2)</span></li>
-          <li><span class="inline-flex items-center px-1 py-0.5 rounded text-[10px] border bg-amber-50 text-amber-700 border-amber-200 font-bold">R2</span> <strong>[O] Bloom filter</strong>: sorted_regionのmissをO(1)で打ち切り、T2への不要なランダムリードを回避する。Get_Missの主因。 <span class="text-slate-400">(docs/specification/low_level_design.md 7.3)</span></li>
-          <li><span class="inline-flex items-center px-1 py-0.5 rounded text-[10px] border bg-sky-50 text-sky-700 border-sky-200 font-bold">R3</span> <strong>[O] base/tail trifecta read policy</strong>: base領域をレコードサイズ・reader別に読む(主mmap / sequential mmap / pread+mincore)。LTMのScan・大レコードGetの主因。+PinSeq/+PinRandomはそのablation。trifecta自体は常時有効のため、この表からの分離は不可で根拠は過去の測定文書による。 <span class="text-slate-400">(docs/specification/low_level_design.md 7.5, docs/benchmark/20260807_scan_t2_base_tail_io_uring_read.md, docs/benchmark/20260810_get_base_mmap_fast_path.md)</span></li>
-          <li><span class="inline-flex items-center px-1 py-0.5 rounded text-[10px] border bg-emerald-50 text-emerald-700 border-emerald-200 font-bold">R4</span> <strong>[A] append-only Insert + append_region O(1) hash</strong>: InsertはT2末尾追記+T1 append_region追加のみ。LSM的な書増幅がなく、最適化なしでも速い土台。 <span class="text-slate-400">(docs/specification/high_level_design.md 3, low_level_design.md 3.2)</span></li>
-          <li><span class="inline-flex items-center px-1 py-0.5 rounded text-[10px] border bg-teal-50 text-teal-700 border-teal-200 font-bold">R5</span> <strong>[A] alloc内 in-place Update</strong>: 割当内に収まる更新はT2追記・T1書換なしで完結する。Zipf Updateの主因。 <span class="text-slate-400">(docs/specification/low_level_design.md 3.3)</span></li>
-          <li><span class="inline-flex items-center px-1 py-0.5 rounded text-[10px] border bg-cyan-50 text-cyan-700 border-cyan-200 font-bold">R6</span> <strong>[A] tombstone-only Delete</strong>: DeleteはT1のtombstone書換のみでT2に触らない。Deleteの主因。 <span class="text-slate-400">(docs/specification/low_level_design.md 3.4)</span></li>
-          <li><span class="inline-flex items-center px-1 py-0.5 rounded text-[10px] border bg-violet-50 text-violet-700 border-violet-200 font-bold">R7</span> <strong>[A] Two-Region + sharded T1 background reorganize/split</strong>: append→sortedの統合をシャード単位の背景処理で吸収し、Scan/YCSBの持続スループットを保つ。 <span class="text-slate-400">(docs/specification/high_level_design.md 3/6, low_level_design.md 4.2/4.6)</span></li>
-          <li><span class="inline-flex items-center px-1 py-0.5 rounded text-[10px] border bg-slate-100 text-slate-600 border-slate-200 font-bold">R8</span> <strong>[A] T1 two-region lookup + T2 direct mmap</strong>: Get_HitはT1のO(1)+O(log N)探索とT2 file-mmap直接読みで完結する。Baseline勝利セルは最適化ではなくこの地力による。 <span class="text-slate-400">(docs/specification/low_level_design.md 3.1)</span></li>
-          <li><span class="inline-flex items-center px-1 py-0.5 rounded text-[10px] border bg-rose-50 text-rose-700 border-rose-200 font-bold">R9</span> <strong>[?] 要調査(再測定対象)</strong>: variant間に実装で説明できない乱高下があり、このセルでは勝因を断定しない。再測定で分散を確認する。 <span class="text-slate-400">(cell_reasons.json R9)</span></li>
-          <li><span class="inline-flex items-center px-1 py-0.5 rounded text-[10px] border bg-orange-50 text-orange-700 border-orange-200 font-bold">R10</span> <strong>[?] 僅差(要再測定)</strong>: 全storeが団子で誤差と区別困難。WIN表示を残しつつ再測定対象とする。 <span class="text-slate-400">(cell_reasons.json R10)</span></li>
+          <li><span class="reason-chip inline-flex items-center px-1 py-0.5 rounded text-[10px] border bg-indigo-50 text-indigo-700 border-indigo-200 font-bold cursor-help" tabindex="0" data-rid="R1" data-hl="#e0e7ff">R1</span> <strong>[O] T1 Inline Value</strong>: 8バイト以下の値はT2をバイパスしT1 payloadに格納する。8Bシナリオと混在コーパスの8B分を底上げする。 <span class="text-slate-400">(docs/specification/low_level_design.md 7.2)</span></li>
+          <li><span class="reason-chip inline-flex items-center px-1 py-0.5 rounded text-[10px] border bg-amber-50 text-amber-700 border-amber-200 font-bold cursor-help" tabindex="0" data-rid="R2" data-hl="#fef3c7">R2</span> <strong>[O] Bloom filter</strong>: sorted_regionのmissをO(1)で打ち切り、T2への不要なランダムリードを回避する。Get_Missの主因。 <span class="text-slate-400">(docs/specification/low_level_design.md 7.3)</span></li>
+          <li><span class="reason-chip inline-flex items-center px-1 py-0.5 rounded text-[10px] border bg-sky-50 text-sky-700 border-sky-200 font-bold cursor-help" tabindex="0" data-rid="R3" data-hl="#e0f2fe">R3</span> <strong>[O] base/tail trifecta read policy</strong>: base領域をレコードサイズ・reader別に読む(主mmap / sequential mmap / pread+mincore)。LTMのScan・大レコードGetの主因。+PinSeq/+PinRandomはそのablation。trifecta自体は常時有効のため、この表からの分離は不可で根拠は過去の測定文書による。 <span class="text-slate-400">(docs/specification/low_level_design.md 7.5, docs/benchmark/20260807_scan_t2_base_tail_io_uring_read.md, docs/benchmark/20260810_get_base_mmap_fast_path.md)</span></li>
+          <li><span class="reason-chip inline-flex items-center px-1 py-0.5 rounded text-[10px] border bg-emerald-50 text-emerald-700 border-emerald-200 font-bold cursor-help" tabindex="0" data-rid="R4" data-hl="#d1fae5">R4</span> <strong>[A] append-only Insert + append_region O(1) hash</strong>: InsertはT2末尾追記+T1 append_region追加のみ。LSM的な書増幅がなく、最適化なしでも速い土台。 <span class="text-slate-400">(docs/specification/high_level_design.md 3, low_level_design.md 3.2)</span></li>
+          <li><span class="reason-chip inline-flex items-center px-1 py-0.5 rounded text-[10px] border bg-teal-50 text-teal-700 border-teal-200 font-bold cursor-help" tabindex="0" data-rid="R5" data-hl="#ccfbf1">R5</span> <strong>[A] alloc内 in-place Update</strong>: 割当内に収まる更新はT2追記・T1書換なしで完結する。Zipf Updateの主因。 <span class="text-slate-400">(docs/specification/low_level_design.md 3.3)</span></li>
+          <li><span class="reason-chip inline-flex items-center px-1 py-0.5 rounded text-[10px] border bg-cyan-50 text-cyan-700 border-cyan-200 font-bold cursor-help" tabindex="0" data-rid="R6" data-hl="#cffafe">R6</span> <strong>[A] tombstone-only Delete</strong>: DeleteはT1のtombstone書換のみでT2に触らない。Deleteの主因。 <span class="text-slate-400">(docs/specification/low_level_design.md 3.4)</span></li>
+          <li><span class="reason-chip inline-flex items-center px-1 py-0.5 rounded text-[10px] border bg-violet-50 text-violet-700 border-violet-200 font-bold cursor-help" tabindex="0" data-rid="R7" data-hl="#ede9fe">R7</span> <strong>[A] Two-Region + sharded T1 background reorganize/split</strong>: append→sortedの統合をシャード単位の背景処理で吸収し、Scan/YCSBの持続スループットを保つ。 <span class="text-slate-400">(docs/specification/high_level_design.md 3/6, low_level_design.md 4.2/4.6)</span></li>
+          <li><span class="reason-chip inline-flex items-center px-1 py-0.5 rounded text-[10px] border bg-slate-100 text-slate-600 border-slate-200 font-bold cursor-help" tabindex="0" data-rid="R8" data-hl="#e2e8f0">R8</span> <strong>[A] T1 two-region lookup + T2 direct mmap</strong>: Get_HitはT1のO(1)+O(log N)探索とT2 file-mmap直接読みで完結する。Baseline勝利セルは最適化ではなくこの地力による。 <span class="text-slate-400">(docs/specification/low_level_design.md 3.1)</span></li>
+          <li><span class="reason-chip inline-flex items-center px-1 py-0.5 rounded text-[10px] border bg-rose-50 text-rose-700 border-rose-200 font-bold cursor-help" tabindex="0" data-rid="R9" data-hl="#ffe4e6">R9</span> <strong>[?] 要調査(再測定対象)</strong>: variant間に実装で説明できない乱高下があり、このセルでは勝因を断定しない。再測定で分散を確認する。 <span class="text-slate-400">(cell_reasons.json R9)</span></li>
+          <li><span class="reason-chip inline-flex items-center px-1 py-0.5 rounded text-[10px] border bg-orange-50 text-orange-700 border-orange-200 font-bold cursor-help" tabindex="0" data-rid="R10" data-hl="#ffedd5">R10</span> <strong>[?] 僅差(要再測定)</strong>: 全storeが団子で誤差と区別困難。WIN表示を残しつつ再測定対象とする。 <span class="text-slate-400">(cell_reasons.json R10)</span></li>
           </ul>
           <ul class="space-y-1 text-[11px] mt-2 list-disc pl-4">
           <li class="text-slate-400">LTMセルはsplit-MGLRU条件(VMemKV classic-LRU / rival MGLRU-on)で測定しており、差分の一部はページング条件差を含む。詳細は low_level_design.md 7.6 と docs/benchmark/20260920_split_condition_publication.md を参照。</li>          <li class="text-slate-400">セル名の+Inline/+BF/+PinSeqはそのセルで最速だったvariantであり、必ずしも勝因そのものではない(近接variant間の差が小さい場合は incidental)。1%以内の同着はセル内に併記する。勝因の検証は同レポート内のablation差分(Baseline vs +BF vs +Inline)で行うこと。R9のセルは差分自体が不安定なため理由を断定しない。R10のセルは全storeが団子のため誤差と区別できない。</li>          <li class="text-slate-400">R9の割付基準: 同一セル内でvariant間に実装で説明できない落差(+BF 0.33〜0.64x、+Inline 0.73〜0.77x、+PinRandom 0.51〜0.77x)があり、1.03〜1.09x級の効果主張がノイズと区別できない場合。Bloomは読み専用ゲート(src/t1_index/t1_index.hpp find_sorted)のためwrite系の落差を説明できない。</li>
@@ -524,17 +524,45 @@
             tip.style.top = y + 'px';
           }
           function hide() { tip.classList.add('hidden'); }
+          function ridOf(el) { return el.getAttribute ? el.getAttribute('data-rid') : null; }
+          // Cross-highlight: paint every matrix cell carrying rid with the hovered
+          // badge's highlight color, dim the rest. Background-only styling, so cell
+          // geometry never moves.
+          function clearHighlight() {
+            var tds = document.querySelectorAll('td[data-reasons]');
+            for (var i = 0; i < tds.length; i++) { tds[i].style.backgroundColor = ''; tds[i].style.opacity = ''; }
+          }
+          function highlight(rid, color) {
+            clearHighlight();
+            var tds = document.querySelectorAll('td[data-reasons]');
+            for (var i = 0; i < tds.length; i++) {
+              var rs = (tds[i].getAttribute('data-reasons') || '').split(' ');
+              var hit = false;
+              for (var k = 0; k < rs.length; k++) { if (rs[k] === rid) { hit = true; break; } }
+              if (hit) { tds[i].style.backgroundColor = color; }
+              else { tds[i].style.opacity = '0.45'; }
+            }
+          }
           document.addEventListener('mouseover', function (e) {
-            var t = e.target && e.target.closest ? e.target.closest('.reason-badge') : null;
-            if (t) { show(t); return; }
-            var inTip = e.target && e.target.closest ? e.target.closest('#reason-tip') : null;
-            if (!inTip) { hide(); }
+            var tgt = e.target && e.target.closest ? e.target : null;
+            var t = tgt ? tgt.closest('.reason-badge') : null;
+            var inTip = tgt ? tgt.closest('#reason-tip') : null;
+            if (t) { show(t); } else if (!inTip) { hide(); }
+            var h = tgt ? tgt.closest('[data-rid]') : null;
+            if (h) { highlight(ridOf(h), h.getAttribute('data-hl') || '#e0e7ff'); } else if (!inTip) { clearHighlight(); }
           });
           document.addEventListener('focusin', function (e) {
-            var t = e.target && e.target.closest ? e.target.closest('.reason-badge') : null;
+            var tgt = e.target && e.target.closest ? e.target : null;
+            if (!tgt) { return; }
+            var t = tgt.closest('.reason-badge');
             if (t) { show(t); }
+            var h = tgt.closest('[data-rid]');
+            if (h) { highlight(ridOf(h), h.getAttribute('data-hl') || '#e0e7ff'); }
           });
-          document.addEventListener('focusout', hide);
+          document.addEventListener('focusout', function () { hide(); clearHighlight(); });
+          document.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape') { hide(); clearHighlight(); }
+          });
           document.addEventListener('scroll', hide, true);
         })();
         </script>
