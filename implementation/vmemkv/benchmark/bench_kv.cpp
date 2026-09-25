@@ -878,6 +878,28 @@ static void copy_t2_checkpoint_sparse(const std::filesystem::path &source,
 // T2 file would let the clone's own later checkpoint cycles corrupt the master (and any other
 // clone sharing that inode) -- it's copied instead (see copy_t2_checkpoint_sparse() above).
 //
+// Post-clone quiesce for diagnosis runs (VMEMKV_BENCH_QUIESCE_AFTER_CLONE=1): the T2
+// sparse copy above streams gigabytes through the page cache and leaves gigabytes
+// dirty, so a benchmark starting immediately after measures an indeterminate mix of
+// draining writeback and timing-dependent cache retention -- suspected cause of
+// run-to-run write variance under cgroup pressure. sync() drains the copy's
+// writeback, drop_caches() restores a deterministic cold cache, and a short settle
+// lets kworker/kswapd go idle. Best-effort (drop_caches needs privilege; local runs
+// without it simply skip that step) and off by default.
+static void quiesce_after_clone() {
+  const char *flag = std::getenv("VMEMKV_BENCH_QUIESCE_AFTER_CLONE");
+  if (flag == nullptr || std::string_view(flag) != "1") {
+    return;
+  }
+  ::sync();
+  if (std::ofstream drop_caches("/proc/sys/vm/drop_caches"); drop_caches.good()) {
+    drop_caches << 3 << std::flush;
+  }
+  const char *secs = std::getenv("VMEMKV_BENCH_QUIESCE_SECS");
+  const auto settle = std::chrono::seconds(secs != nullptr ? std::atoi(secs) : 3);
+  std::this_thread::sleep_for(settle);
+}
+
 // This is what lets Get/Update/Delete/YCSB-E/Scan (see their registrations below) all get a
 // fresh, fully-populated, fully-reorganized instance on every construction without paying
 // bulk_load's cost more than once per (variant, val_size) -- and, since they all pass the same
@@ -939,6 +961,8 @@ static auto make_vmemkv_clone_from_checkpoint(const std::string &master_path,
   }
   copy_t2_checkpoint_sparse(master_t2, instance_t2, manifest->t2_bytes_used);
   vmemkv::write_manifest(vmemkv::derive_manifest_path(instance_path), manifest->generation, manifest->t2_bytes_used);
+
+  quiesce_after_clone();
 
   return std::make_unique<Store>(instance_path, Store::ConfigType::DefaultT2CapacityBytes);
 }

@@ -554,9 +554,12 @@ declare -A SCENARIO_TOTALS=(
 )
 
 # Shared remote-command environment for LTM passes. Sets LTM_PASS_CTX_PREFIX,
-# LTM_PASS_RT_PREFIX, LTM_PASS_ENV_PREFIX, LTM_PASS_LVF_PREFIX, LTM_PASS_YPOP_PREFIX
-# globals for a scenario, so the matrix and headline passes build byte-identical remote
-# environments (same cgroup/memory posture, DB dir, SKIP_CLEANUP, and populate flags).
+# LTM_PASS_RT_PREFIX, LTM_PASS_ENV_PREFIX, LTM_PASS_LVF_PREFIX, LTM_PASS_YPOP_PREFIX,
+# LTM_PASS_QUIESCE_PREFIX globals for a scenario, so the matrix and headline passes
+# build byte-identical remote environments (same cgroup/memory posture, DB dir,
+# SKIP_CLEANUP, and populate flags). Clone quiesce is standard here: the per-group T2
+# sparse copy streams gigabytes through the page cache, and measuring on its residue
+# makes throughput run-dependent (see quiesce_after_clone() in bench_kv.cpp).
 set_ltm_pass_env() {
   local scenario_key="$1"
   LTM_PASS_CTX_PREFIX="$(scenario_context_env_prefix "$scenario_key")"
@@ -572,6 +575,10 @@ set_ltm_pass_env() {
   LTM_PASS_YPOP_PREFIX=""
   if [[ -n "${YCSB_E_POPULATE:-}" ]]; then
     LTM_PASS_YPOP_PREFIX="YCSB_E_POPULATE=${YCSB_E_POPULATE}"
+  fi
+  LTM_PASS_QUIESCE_PREFIX="VMEMKV_BENCH_QUIESCE_AFTER_CLONE=1"
+  if [[ "${VMEMKV_BENCH_QUIESCE_AFTER_CLONE:-1}" == "0" ]]; then
+    LTM_PASS_QUIESCE_PREFIX=""
   fi
 }
 
@@ -712,7 +719,7 @@ run_ltm_isolated_groups() {
     group_remote_cmd="
 cd /home/ubuntu/faultkv/vmemkv &&
 ${LTM_PASS_CTX_PREFIX} ${LTM_PASS_RT_PREFIX:+${LTM_PASS_RT_PREFIX} }VMEMKV_DB_DIR=/mnt/nvme ${LTM_PASS_ENV_PREFIX:+${LTM_PASS_ENV_PREFIX} }${LTM_PASS_LVF_PREFIX:+${LTM_PASS_LVF_PREFIX} }VMEMKV_BENCH_SKIP_CLEANUP=1 \
-${LTM_PASS_YPOP_PREFIX:+${LTM_PASS_YPOP_PREFIX} }\
+${LTM_PASS_YPOP_PREFIX:+${LTM_PASS_YPOP_PREFIX} }${LTM_PASS_QUIESCE_PREFIX:+${LTM_PASS_QUIESCE_PREFIX} }\
 ./benchmark/common/run_scenario.sh \
   './build-rel/benchmark/bench_kv' \
   '$group_filter' \
