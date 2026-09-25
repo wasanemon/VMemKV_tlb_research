@@ -878,14 +878,14 @@ static void copy_t2_checkpoint_sparse(const std::filesystem::path &source,
 // T2 file would let the clone's own later checkpoint cycles corrupt the master (and any other
 // clone sharing that inode) -- it's copied instead (see copy_t2_checkpoint_sparse() above).
 //
-// Post-clone quiesce for diagnosis runs (VMEMKV_BENCH_QUIESCE_AFTER_CLONE=1): the T2
-// sparse copy above streams gigabytes through the page cache and leaves gigabytes
-// dirty, so a benchmark starting immediately after measures an indeterminate mix of
-// draining writeback and timing-dependent cache retention -- suspected cause of
-// run-to-run write variance under cgroup pressure. sync() drains the copy's
-// writeback, drop_caches() restores a deterministic cold cache, and a short settle
-// lets kworker/kswapd go idle. Best-effort (drop_caches needs privilege; local runs
-// without it simply skip that step) and off by default.
+// Post-clone quiesce, standard on LTM passes (VMEMKV_BENCH_QUIESCE_AFTER_CLONE=1,
+// opt out with =0): the T2 sparse copy above streams gigabytes through the page cache
+// and leaves gigabytes dirty, so a benchmark starting immediately after measures an
+// indeterminate mix of draining writeback and timing-dependent cache retention -- the
+// confirmed cause of run-to-run write variance under cgroup pressure. sync() drains
+// the copy's writeback, drop_caches() restores a deterministic cold cache, and a short
+// settle lets kworker/kswapd go idle. Best-effort (drop_caches needs privilege; local
+// runs without it simply skip that step) and off by default.
 static void quiesce_after_clone() {
   const char *flag = std::getenv("VMEMKV_BENCH_QUIESCE_AFTER_CLONE");
   if (flag == nullptr || std::string_view(flag) != "1") {

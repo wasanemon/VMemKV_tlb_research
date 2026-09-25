@@ -415,6 +415,10 @@ prepare_remote_storage() {
     # gets its own device whenever one is available (standard practice, same as a
     # dedicated RocksDB WAL dir; see VMEMKV_WAL_DIR in src/wal/wal.hpp). i4i.8xlarge
     # carries two local NVMes; single-device boxes skip this with a warning.
+    # NOTE: kept as a separate loop rather than a shared helper with the main
+    # selection above: this whole block executes remotely inside a double-quoted ssh
+    # string, where every $ must stay escaped -- sharing raises mis-expansion risk
+    # for little gain.
     DEV2=\"\"
     for CAND in \$(lsblk -dbno NAME,SIZE | grep -E '^nvme[0-9]+n1' | sort -k2 -n -r | awk '{print \$1}'); do
       if [ \"/dev/\$CAND\" = \"\$DEV\" ]; then
@@ -592,6 +596,23 @@ declare -A SCENARIO_TOTALS=(
   [ltm]=0
 )
 
+# Appends "VAR=value " pairs to the named accumulator for every listed env var that
+# is set and non-empty, so normal runs stay byte-identical. Local-only helper for
+# set_ltm_pass_env() below.
+# Usage: vmemkv_forward_env ACCUMULATOR VAR...
+vmemkv_forward_env() {
+  local acc_name="$1"
+  shift
+  local current="${!acc_name:-}" var_name var_value
+  for var_name in "$@"; do
+    var_value="${!var_name:-}"
+    if [[ -n "$var_value" ]]; then
+      current+="${var_name}=${var_value} "
+    fi
+  done
+  printf -v "$acc_name" '%s' "$current"
+}
+
 # Shared remote-command environment for LTM passes. Sets LTM_PASS_CTX_PREFIX,
 # LTM_PASS_RT_PREFIX, LTM_PASS_ENV_PREFIX, LTM_PASS_LVF_PREFIX, LTM_PASS_YPOP_PREFIX,
 # LTM_PASS_QUIESCE_PREFIX globals for a scenario, so the matrix and headline passes
@@ -601,6 +622,7 @@ declare -A SCENARIO_TOTALS=(
 # makes throughput run-dependent (see quiesce_after_clone() in bench_kv.cpp).
 set_ltm_pass_env() {
   local scenario_key="$1"
+  local waldir_probe
   LTM_PASS_CTX_PREFIX="$(scenario_context_env_prefix "$scenario_key")"
   LTM_PASS_RT_PREFIX=""
   if [[ "$scenario_key" == "in_memory" ]]; then
@@ -620,21 +642,19 @@ set_ltm_pass_env() {
     LTM_PASS_QUIESCE_PREFIX=""
   fi
   # WAL separation follows the mount, not flags: forward the dir only when
-  # prepare_remote_storage actually mounted it (single-device boxes stay silent).
+  # prepare_remote_storage actually mounted it. An ssh failure here must be loud --
+  # silently continuing single-device would bring the variance back unnoticed.
   LTM_PASS_WALDIR_PREFIX=""
-  if ssh $SSH_OPTS "ubuntu@$PUBLIC_IP" "test -d /mnt/nvme2/wal" 2>/dev/null; then
+  waldir_probe="$(ssh $SSH_OPTS "ubuntu@$PUBLIC_IP" "test -d /mnt/nvme2/wal && echo yes || echo no" 2>/dev/null)"
+  if [[ "$waldir_probe" == "yes" ]]; then
     LTM_PASS_WALDIR_PREFIX="VMEMKV_WAL_DIR=/mnt/nvme2/wal "
+  elif [[ -z "$waldir_probe" ]]; then
+    echo "[runner] WARNING: WAL dir probe failed -- continuing single-device" >&2
   fi
-  # Measurement-window overrides (shaped after the YPOP precedent: forwarded only
-  # when set, so normal runs are byte-identical). bench_kv honors these natively;
+  # Measurement-window overrides (forwarded only when set, so normal runs stay
+  # byte-identical with the YPOP knob above). bench_kv honors these natively;
   # Update follows the runner's MIN_TIME.
-  LTM_PASS_WINTIME_PREFIX=""
-  if [[ -n "${VMEMKV_BENCH_INSERT_TIME_BUDGET_SECONDS:-}" ]]; then
-    LTM_PASS_WINTIME_PREFIX+="VMEMKV_BENCH_INSERT_TIME_BUDGET_SECONDS=${VMEMKV_BENCH_INSERT_TIME_BUDGET_SECONDS} "
-  fi
-  if [[ -n "${VMEMKV_BENCH_DELETE_TIME_BUDGET_SECONDS:-}" ]]; then
-    LTM_PASS_WINTIME_PREFIX+="VMEMKV_BENCH_DELETE_TIME_BUDGET_SECONDS=${VMEMKV_BENCH_DELETE_TIME_BUDGET_SECONDS} "
-  fi
+  vmemkv_forward_env LTM_PASS_WINTIME_PREFIX VMEMKV_BENCH_INSERT_TIME_BUDGET_SECONDS VMEMKV_BENCH_DELETE_TIME_BUDGET_SECONDS
 }
 
 # Runs one ssh invocation with stdout/stderr teed to the given logs (mirrored to this
