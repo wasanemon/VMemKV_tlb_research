@@ -63,22 +63,6 @@
       "short": "split-MGLRU paging condition",
       "detail": "LTMはsplit-MGLRU条件(VMemKV classic-LRU / rival MGLRU-on)で測定しており、条件差自体が差分の一部になり得る。",
       "doc": "docs/specification/low_level_design.md 7.6, docs/benchmark/20260919_mglru_sensitivity.md, docs/benchmark/20260920_split_condition_publication.md"
-    },
-    "R9": {
-      "cat": "?",
-      "concept": "M",
-      "color": "rose",
-      "short": "要調査(再測定対象)",
-      "detail": "4-run測定でVMemKV write系のみCV 20〜67%(rivalは概ね<6%)。run内実行位置との相関は+0.15で蓄積仮説は棄却、run水準の要因。機構切り分け中のため勝因を断定しない。",
-      "doc": "cell_reasons.json R9"
-    },
-    "R10": {
-      "cat": "?",
-      "concept": "M",
-      "color": "stone",
-      "short": "僅差(要再測定)",
-      "detail": "全storeが団子で誤差と区別困難。WIN表示を残しつつ再測定対象とする。",
-      "doc": "cell_reasons.json R10"
     }
   },
   "cells": {
@@ -95,8 +79,7 @@
       "R4"
     ],
     "Insert|64KB_LTM": [
-      "R1",
-      "R9"
+      "R1"
     ],
     "Update|8B_In-Memory": [
       "R2"
@@ -105,12 +88,10 @@
       "R2"
     ],
     "Update|1KB_LTM": [
-      "R2",
-      "R9"
+      "R2"
     ],
     "Update|64KB_LTM": [
-      "R2",
-      "R9"
+      "R2"
     ],
     "Delete|8B_In-Memory": [
       "R3",
@@ -120,12 +101,10 @@
       "R3"
     ],
     "Delete|1KB_LTM": [
-      "R3",
-      "R9"
+      "R3"
     ],
     "Delete|64KB_LTM": [
-      "R3",
-      "R9"
+      "R3"
     ],
     "Get_Miss|8B_In-Memory": [
       "R5"
@@ -194,16 +173,13 @@
     "Scan_Uniform|8B_In-Memory": [
       "R4"
     ],
-    "Scan_Uniform|1KB_In-Memory": [
-      "R10"
-    ],
+    "Scan_Uniform|1KB_In-Memory": [],
     "Scan_Uniform|1KB_LTM": [
       "R6",
       "R8"
     ],
     "Scan_Uniform|64KB_LTM": [
       "R6",
-      "R10",
       "R7",
       "R8"
     ],
@@ -219,15 +195,14 @@
     ],
     "YCSB_E|64KB_LTM": [
       "R6",
-      "R10",
       "R8"
     ]
   },
   "notes": [
     "LTMセルはsplit-MGLRU条件(VMemKV classic-LRU / rival MGLRU-on)で測定しており、差分の一部はページング条件差を含む。詳細は low_level_design.md 7.6 と docs/benchmark/20260920_split_condition_publication.md を参照。",
-    "セル名の+Inline/+BF/+PinSeqはそのセルで最速だったvariantであり、必ずしも勝因そのものではない(近接variant間の差が小さい場合は incidental)。1%以内の同着はセル内に併記する。勝因の検証は同レポート内のablation差分(Baseline vs +BF vs +Inline)で行うこと。R9のセルは差分自体が不安定なため理由を断定しない。R10のセルは全storeが団子のため誤差と区別できない。",
-    "R9の割付基準: 同一セル内でvariant間に実装で説明できない落差(+BF 0.33〜0.64x、+Inline 0.73〜0.77x、+PinRandom 0.51〜0.77x)があり、1.03〜1.09x級の効果主張がノイズと区別できない場合。Bloomは読み専用ゲート(src/t1_index/t1_index.hpp find_sorted)のためwrite系の落差を説明できない。",
-    "セル内の±は同一条件4-run(20260923本走 + 狭窄再走3回、いずれもper-cell隔離)のCV。n=4。"
+    "僅差の勝利セルは±CVで定量化する。再測定により誤差幅が確定したため僅差マーカーは廃止した。",
+    "セル内の±は同一セル複数run(per-cell隔離)のCV。quiesce前4run+quiesce標準後の走行を混合し、nはセル毎に1〜8。quiesce前の分散を含むため保守的(広め)に出る。",
+    "write系のrun間分散の原因は特定済み: clone残滓(quiesce標準化で解消)+短窓標本分散(30秒窓で収束確認)+T2書戻し/WAL fsync競合(WAL分離で解消・標準デプロイ化)。Delete/Insert/Update 64KBの分離走行で全variant収束を確認した。"
   ],
   "concepts": {
     "C1": {

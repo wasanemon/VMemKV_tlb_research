@@ -429,8 +429,6 @@ _REASON_PALETTE = {
     "yellow": ("bg-yellow-50 text-yellow-700 border-yellow-200", "bg-yellow-400", "#fef9c3"),
     "violet": ("bg-violet-50 text-violet-700 border-violet-200", "bg-violet-400", "#ede9fe"),
     "purple": ("bg-purple-50 text-purple-700 border-purple-200", "bg-purple-400", "#f3e8ff"),
-    "rose": ("bg-rose-50 text-rose-700 border-rose-200", "bg-rose-400", "#ffe4e6"),
-    "stone": ("bg-stone-200 text-stone-700 border-stone-300", "bg-stone-400", "#e7e5e4"),
 }
 
 
