@@ -410,6 +410,45 @@ prepare_remote_storage() {
     sudo chown -R ubuntu:ubuntu /mnt/nvme
     echo \"Mounted NVMe SSD to /mnt/nvme\"
 
+    # Second NVMe for WAL separation: T2 bulk writeback and WAL fsyncs on one device
+    # contend and produce run-to-run write variance under memory pressure, so the WAL
+    # gets its own device whenever one is available (standard practice, same as a
+    # dedicated RocksDB WAL dir; see VMEMKV_WAL_DIR in src/wal/wal.hpp). i4i.8xlarge
+    # carries two local NVMes; single-device boxes skip this with a warning.
+    DEV2=\"\"
+    for CAND in \$(lsblk -dbno NAME,SIZE | grep -E '^nvme[0-9]+n1' | sort -k2 -n -r | awk '{print \$1}'); do
+      if [ \"/dev/\$CAND\" = \"\$DEV\" ]; then
+        continue
+      fi
+      PART_COUNT=\$(lsblk -ln -o NAME \"/dev/\$CAND\" | wc -l)
+      if [ \"\$PART_COUNT\" -gt 1 ]; then
+        continue
+      fi
+      if findmnt -rn -S \"/dev/\$CAND\" >/dev/null 2>&1; then
+        continue
+      fi
+      DEV2=\"/dev/\$CAND\"
+      break
+    done
+    if [ -z \"\$DEV2\" ]; then
+      echo \"No second NVMe SSD found -- continuing single-device (no WAL separation)\" >&2
+    else
+      sudo mkdir -p /mnt/nvme2
+      if ! sudo blkid \"\$DEV2\" >/dev/null 2>&1; then
+        echo \"Formatting second NVMe SSD \$DEV2 as ext4...\"
+        sudo mkfs.ext4 -F \"\$DEV2\" >/dev/null 2>&1
+      fi
+      sudo mount \"\$DEV2\" /mnt/nvme2 || { echo \"[ERROR] Failed to mount second NVMe SSD \$DEV2\" >&2; exit 1; }
+      if ! findmnt -rn /mnt/nvme2 >/dev/null 2>&1; then
+        echo \"[ERROR] /mnt/nvme2 is not a mount point after mounting \$DEV2\" >&2
+        exit 1
+      fi
+      sudo chown -R ubuntu:ubuntu /mnt/nvme2
+      sudo mkdir -p /mnt/nvme2/wal
+      sudo chown -R ubuntu:ubuntu /mnt/nvme2/wal
+      echo \"Mounted second NVMe SSD \$DEV2 to /mnt/nvme2 for WAL separation\"
+    fi
+
     SWAPFILE_SIZE_GB=\${AWS_SWAPFILE_SIZE_GB:-32}
     SWAPFILE_SIZE_BYTES=\$((SWAPFILE_SIZE_GB * 1024 * 1024 * 1024))
     AVAILABLE_BYTES=\$(df -B1 --output=avail /mnt/nvme | tail -n 1 | tr -d ' ')
@@ -580,6 +619,22 @@ set_ltm_pass_env() {
   if [[ "${VMEMKV_BENCH_QUIESCE_AFTER_CLONE:-1}" == "0" ]]; then
     LTM_PASS_QUIESCE_PREFIX=""
   fi
+  # WAL separation follows the mount, not flags: forward the dir only when
+  # prepare_remote_storage actually mounted it (single-device boxes stay silent).
+  LTM_PASS_WALDIR_PREFIX=""
+  if ssh $SSH_OPTS "ubuntu@$PUBLIC_IP" "test -d /mnt/nvme2/wal" 2>/dev/null; then
+    LTM_PASS_WALDIR_PREFIX="VMEMKV_WAL_DIR=/mnt/nvme2/wal "
+  fi
+  # Measurement-window overrides (shaped after the YPOP precedent: forwarded only
+  # when set, so normal runs are byte-identical). bench_kv honors these natively;
+  # Update follows the runner's MIN_TIME.
+  LTM_PASS_WINTIME_PREFIX=""
+  if [[ -n "${VMEMKV_BENCH_INSERT_TIME_BUDGET_SECONDS:-}" ]]; then
+    LTM_PASS_WINTIME_PREFIX+="VMEMKV_BENCH_INSERT_TIME_BUDGET_SECONDS=${VMEMKV_BENCH_INSERT_TIME_BUDGET_SECONDS} "
+  fi
+  if [[ -n "${VMEMKV_BENCH_DELETE_TIME_BUDGET_SECONDS:-}" ]]; then
+    LTM_PASS_WINTIME_PREFIX+="VMEMKV_BENCH_DELETE_TIME_BUDGET_SECONDS=${VMEMKV_BENCH_DELETE_TIME_BUDGET_SECONDS} "
+  fi
 }
 
 # Runs one ssh invocation with stdout/stderr teed to the given logs (mirrored to this
@@ -719,7 +774,7 @@ run_ltm_isolated_groups() {
     group_remote_cmd="
 cd /home/ubuntu/faultkv/vmemkv &&
 ${LTM_PASS_CTX_PREFIX} ${LTM_PASS_RT_PREFIX:+${LTM_PASS_RT_PREFIX} }VMEMKV_DB_DIR=/mnt/nvme ${LTM_PASS_ENV_PREFIX:+${LTM_PASS_ENV_PREFIX} }${LTM_PASS_LVF_PREFIX:+${LTM_PASS_LVF_PREFIX} }VMEMKV_BENCH_SKIP_CLEANUP=1 \
-${LTM_PASS_YPOP_PREFIX:+${LTM_PASS_YPOP_PREFIX} }${LTM_PASS_QUIESCE_PREFIX:+${LTM_PASS_QUIESCE_PREFIX} }\
+${LTM_PASS_YPOP_PREFIX:+${LTM_PASS_YPOP_PREFIX} }${LTM_PASS_QUIESCE_PREFIX:+${LTM_PASS_QUIESCE_PREFIX} }${LTM_PASS_WINTIME_PREFIX:+${LTM_PASS_WINTIME_PREFIX} }${LTM_PASS_WALDIR_PREFIX:+${LTM_PASS_WALDIR_PREFIX} }\
 ./benchmark/common/run_scenario.sh \
   './build-rel/benchmark/bench_kv' \
   '$group_filter' \

@@ -5,6 +5,7 @@
 #include <atomic>
 #include <condition_variable>
 #include <cstdint>
+#include <cstdlib>
 #include <exception>
 #include <filesystem>
 #include <functional>
@@ -45,7 +46,16 @@ static_assert(std::is_standard_layout_v<WalRecordHeader>);
 // Derives the sibling WAL identity path for a given T2 flat-file path (path + ".wal"). Not a file
 // itself -- see derive_wal_segment_path() for the actual on-disk segment files this identity
 // names.
+//
+// Deployment option: VMEMKV_WAL_DIR redirects WAL segments to a second device (e.g. the
+// instance's other local NVMe). T2 bulk writeback and WAL fsyncs on one device contend and
+// produce run-to-run write variance under memory pressure; separating them stabilizes
+// throughput (and slightly improves it). Standard practice, same as RocksDB's dedicated
+// WAL dir. Unset by default: single-device layout.
 inline auto derive_wal_path(const std::filesystem::path &t2_path) -> std::filesystem::path {
+  if (const char *wal_dir = std::getenv("VMEMKV_WAL_DIR")) {
+    return {std::filesystem::path(wal_dir) / (t2_path.filename().string() + ".wal")};
+  }
   return {t2_path.string() + ".wal"};
 }
 
