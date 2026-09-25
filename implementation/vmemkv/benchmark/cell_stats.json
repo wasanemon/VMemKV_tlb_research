@@ -1,0 +1,326 @@
+{
+  "Delete|64KB_LTM|LMDB": {
+    "mean_k": 2.89,
+    "stddev_k": 0.14,
+    "cv_pct": 4.8,
+    "n": 4
+  },
+  "Insert|64KB_LTM|LMDB": {
+    "mean_k": 3.56,
+    "stddev_k": 0.04,
+    "cv_pct": 1.2,
+    "n": 4
+  },
+  "Scan_Uniform|64KB_LTM|LMDB": {
+    "mean_k": 0.59,
+    "stddev_k": 0.0,
+    "cv_pct": 0.5,
+    "n": 4
+  },
+  "Update|64KB_LTM|LMDB": {
+    "mean_k": 5.26,
+    "stddev_k": 0.12,
+    "cv_pct": 2.2,
+    "n": 4
+  },
+  "YCSB_E|64KB_LTM|LMDB": {
+    "mean_k": 2.34,
+    "stddev_k": 0.0,
+    "cv_pct": 0.2,
+    "n": 4
+  },
+  "Delete|1KB_In-Memory|RocksDB-BlobDB": {
+    "mean_k": 79.18,
+    "stddev_k": 0.74,
+    "cv_pct": 0.9,
+    "n": 4
+  },
+  "Delete|64KB_LTM|RocksDB-BlobDB": {
+    "mean_k": 39.52,
+    "stddev_k": 0.41,
+    "cv_pct": 1.0,
+    "n": 4
+  },
+  "Insert|64KB_LTM|RocksDB-BlobDB": {
+    "mean_k": 4.81,
+    "stddev_k": 0.14,
+    "cv_pct": 3.0,
+    "n": 4
+  },
+  "Scan_Uniform|64KB_LTM|RocksDB-BlobDB": {
+    "mean_k": 0.67,
+    "stddev_k": 0.0,
+    "cv_pct": 0.4,
+    "n": 4
+  },
+  "Update|1KB_In-Memory|RocksDB-BlobDB": {
+    "mean_k": 72.2,
+    "stddev_k": 2.44,
+    "cv_pct": 3.4,
+    "n": 4
+  },
+  "Update|64KB_LTM|RocksDB-BlobDB": {
+    "mean_k": 4.09,
+    "stddev_k": 0.54,
+    "cv_pct": 13.3,
+    "n": 4
+  },
+  "YCSB_E|64KB_LTM|RocksDB-BlobDB": {
+    "mean_k": 2.04,
+    "stddev_k": 0.02,
+    "cv_pct": 1.2,
+    "n": 4
+  },
+  "Delete|1KB_In-Memory|RocksDB": {
+    "mean_k": 71.92,
+    "stddev_k": 0.72,
+    "cv_pct": 1.0,
+    "n": 4
+  },
+  "Delete|64KB_LTM|RocksDB": {
+    "mean_k": 38.51,
+    "stddev_k": 0.5,
+    "cv_pct": 1.3,
+    "n": 4
+  },
+  "Insert|64KB_LTM|RocksDB": {
+    "mean_k": 4.15,
+    "stddev_k": 0.4,
+    "cv_pct": 9.6,
+    "n": 4
+  },
+  "Scan_Uniform|64KB_LTM|RocksDB": {
+    "mean_k": 0.65,
+    "stddev_k": 0.0,
+    "cv_pct": 0.5,
+    "n": 4
+  },
+  "Update|1KB_In-Memory|RocksDB": {
+    "mean_k": 72.61,
+    "stddev_k": 1.38,
+    "cv_pct": 1.9,
+    "n": 4
+  },
+  "Update|64KB_LTM|RocksDB": {
+    "mean_k": 4.46,
+    "stddev_k": 0.35,
+    "cv_pct": 7.9,
+    "n": 4
+  },
+  "YCSB_E|64KB_LTM|RocksDB": {
+    "mean_k": 2.55,
+    "stddev_k": 0.01,
+    "cv_pct": 0.5,
+    "n": 4
+  },
+  "Delete|1KB_In-Memory|Baseline": {
+    "mean_k": 147.03,
+    "stddev_k": 12.75,
+    "cv_pct": 8.7,
+    "n": 4
+  },
+  "Delete|64KB_LTM|Baseline": {
+    "mean_k": 149.94,
+    "stddev_k": 11.01,
+    "cv_pct": 7.3,
+    "n": 4
+  },
+  "Insert|64KB_LTM|Baseline": {
+    "mean_k": 6.88,
+    "stddev_k": 1.67,
+    "cv_pct": 24.4,
+    "n": 4
+  },
+  "Scan_Uniform|64KB_LTM|Baseline": {
+    "mean_k": 0.68,
+    "stddev_k": 0.04,
+    "cv_pct": 6.0,
+    "n": 4
+  },
+  "Update|1KB_In-Memory|Baseline": {
+    "mean_k": 84.88,
+    "stddev_k": 10.1,
+    "cv_pct": 11.9,
+    "n": 4
+  },
+  "Update|64KB_LTM|Baseline": {
+    "mean_k": 8.73,
+    "stddev_k": 2.05,
+    "cv_pct": 23.5,
+    "n": 4
+  },
+  "YCSB_E|64KB_LTM|Baseline": {
+    "mean_k": 2.68,
+    "stddev_k": 0.05,
+    "cv_pct": 1.7,
+    "n": 4
+  },
+  "Delete|1KB_In-Memory|+PinRandom": {
+    "mean_k": 153.67,
+    "stddev_k": 3.1,
+    "cv_pct": 2.0,
+    "n": 4
+  },
+  "Delete|64KB_LTM|+PinRandom": {
+    "mean_k": 80.11,
+    "stddev_k": 49.34,
+    "cv_pct": 61.6,
+    "n": 4
+  },
+  "Insert|64KB_LTM|+PinRandom": {
+    "mean_k": 7.6,
+    "stddev_k": 1.64,
+    "cv_pct": 21.6,
+    "n": 4
+  },
+  "Scan_Uniform|64KB_LTM|+PinRandom": {
+    "mean_k": 0.16,
+    "stddev_k": 0.0,
+    "cv_pct": 0.4,
+    "n": 4
+  },
+  "Update|1KB_In-Memory|+PinRandom": {
+    "mean_k": 87.42,
+    "stddev_k": 12.28,
+    "cv_pct": 14.0,
+    "n": 4
+  },
+  "Update|64KB_LTM|+PinRandom": {
+    "mean_k": 9.09,
+    "stddev_k": 1.82,
+    "cv_pct": 20.0,
+    "n": 4
+  },
+  "YCSB_E|64KB_LTM|+PinRandom": {
+    "mean_k": 0.58,
+    "stddev_k": 0.0,
+    "cv_pct": 0.8,
+    "n": 4
+  },
+  "Delete|1KB_In-Memory|+PinSeq": {
+    "mean_k": 148.42,
+    "stddev_k": 8.85,
+    "cv_pct": 6.0,
+    "n": 4
+  },
+  "Delete|64KB_LTM|+PinSeq": {
+    "mean_k": 114.58,
+    "stddev_k": 41.67,
+    "cv_pct": 36.4,
+    "n": 4
+  },
+  "Insert|64KB_LTM|+PinSeq": {
+    "mean_k": 6.14,
+    "stddev_k": 1.78,
+    "cv_pct": 29.0,
+    "n": 4
+  },
+  "Scan_Uniform|64KB_LTM|+PinSeq": {
+    "mean_k": 0.69,
+    "stddev_k": 0.04,
+    "cv_pct": 5.3,
+    "n": 4
+  },
+  "Update|1KB_In-Memory|+PinSeq": {
+    "mean_k": 85.3,
+    "stddev_k": 9.93,
+    "cv_pct": 11.6,
+    "n": 4
+  },
+  "Update|64KB_LTM|+PinSeq": {
+    "mean_k": 7.15,
+    "stddev_k": 1.77,
+    "cv_pct": 24.8,
+    "n": 4
+  },
+  "YCSB_E|64KB_LTM|+PinSeq": {
+    "mean_k": 2.39,
+    "stddev_k": 0.1,
+    "cv_pct": 4.2,
+    "n": 4
+  },
+  "Delete|1KB_In-Memory|+Inline": {
+    "mean_k": 143.9,
+    "stddev_k": 18.87,
+    "cv_pct": 13.1,
+    "n": 4
+  },
+  "Delete|64KB_LTM|+Inline": {
+    "mean_k": 110.94,
+    "stddev_k": 56.32,
+    "cv_pct": 50.8,
+    "n": 4
+  },
+  "Insert|64KB_LTM|+Inline": {
+    "mean_k": 7.54,
+    "stddev_k": 2.49,
+    "cv_pct": 33.0,
+    "n": 4
+  },
+  "Scan_Uniform|64KB_LTM|+Inline": {
+    "mean_k": 0.68,
+    "stddev_k": 0.04,
+    "cv_pct": 6.5,
+    "n": 4
+  },
+  "Update|1KB_In-Memory|+Inline": {
+    "mean_k": 86.85,
+    "stddev_k": 9.69,
+    "cv_pct": 11.2,
+    "n": 4
+  },
+  "Update|64KB_LTM|+Inline": {
+    "mean_k": 9.43,
+    "stddev_k": 1.07,
+    "cv_pct": 11.4,
+    "n": 4
+  },
+  "YCSB_E|64KB_LTM|+Inline": {
+    "mean_k": 2.69,
+    "stddev_k": 0.06,
+    "cv_pct": 2.3,
+    "n": 4
+  },
+  "Delete|1KB_In-Memory|+BF": {
+    "mean_k": 138.74,
+    "stddev_k": 24.85,
+    "cv_pct": 17.9,
+    "n": 4
+  },
+  "Delete|64KB_LTM|+BF": {
+    "mean_k": 66.89,
+    "stddev_k": 31.98,
+    "cv_pct": 47.8,
+    "n": 4
+  },
+  "Insert|64KB_LTM|+BF": {
+    "mean_k": 6.43,
+    "stddev_k": 1.6,
+    "cv_pct": 24.8,
+    "n": 4
+  },
+  "Scan_Uniform|64KB_LTM|+BF": {
+    "mean_k": 0.66,
+    "stddev_k": 0.03,
+    "cv_pct": 5.0,
+    "n": 4
+  },
+  "Update|1KB_In-Memory|+BF": {
+    "mean_k": 84.38,
+    "stddev_k": 10.27,
+    "cv_pct": 12.2,
+    "n": 4
+  },
+  "Update|64KB_LTM|+BF": {
+    "mean_k": 7.95,
+    "stddev_k": 1.96,
+    "cv_pct": 24.7,
+    "n": 4
+  },
+  "YCSB_E|64KB_LTM|+BF": {
+    "mean_k": 2.68,
+    "stddev_k": 0.06,
+    "cv_pct": 2.3,
+    "n": 4
+  }
+}

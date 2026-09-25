@@ -439,9 +439,11 @@ def _reason_colors(info):
     return _REASON_PALETTE.get((info or {}).get("color", "blue"), _REASON_PALETTE["blue"])
 
 
-def render_winners_matrix_html(rows, cell_reasons=None):
+def render_winners_matrix_html(rows, cell_reasons=None, cell_stats=None):
     """Winners matrix <tr> rows. cell_reasons (load_cell_reasons()'s output, or None)
-    adds per-cell [Rn] badges with hover tooltips; unknown/missing cells render bare."""
+    adds per-cell [Rn] badges with hover tooltips; unknown/missing cells render bare.
+    cell_stats (load_cell_stats()'s output, or None) appends cross-run ±CV% (n=4) to
+    winner labels where measured."""
     reasons = (cell_reasons or {}).get("reasons", {})
     cells_map = (cell_reasons or {}).get("cells", {})
     scenario_keys = ["8B_In-Memory", "1KB_In-Memory", "1KB_LTM", "64KB_LTM"]
@@ -461,7 +463,21 @@ def render_winners_matrix_html(rows, cell_reasons=None):
             ratio = cell["ratio"]
             label_text, badge_class = _badge_for_ratio(ratio)
             tied_labels = cell.get("vmemkv_labels", [cell["vmemkv_label"]])
-            vmemkv_text = tied_labels[0] if len(tied_labels) == 1 else ", ".join(tied_labels) + " 同着"
+            stats = (cell_stats or {}).get("stats", {})
+            stat_parts = []
+            for lbl in tied_labels:
+                st = stats.get(f"{workload}|{scenario_key}|{lbl}")
+                if st is not None:
+                    stat_parts.append(f'{lbl} ±{st["cv_pct"]}%')
+                else:
+                    stat_parts.append(lbl)
+            if any(f"{workload}|{scenario_key}|{lbl}" in stats for lbl in tied_labels):
+                n = stats.get(f"{workload}|{scenario_key}|{tied_labels[0]}", {}).get("n", "")
+                vmemkv_text = ", ".join(stat_parts) + (f" (n={n})" if n else "")
+            else:
+                vmemkv_text = tied_labels[0]
+            if len(tied_labels) > 1:
+                vmemkv_text += " 同着"
             reason_ids = cells_map.get(f"{workload}|{scenario_key}", [])
             reason_badges = []
             for rid in reason_ids:
@@ -509,6 +525,14 @@ def load_cell_reasons(path):
     data = json.loads(Path(path).read_text())
     return {"reasons": data.get("reasons", {}), "cells": data.get("cells", {}),
             "notes": data.get("notes", []), "concepts": data.get("concepts", {})}
+
+
+def load_cell_stats(path):
+    """Loads a cell_stats.json file: {"<WORKLOAD>|<scenario_key>|<label>":
+    {mean_k, stddev_k, cv_pct, n}}. Returns {} when path is None."""
+    if path is None:
+        return {}
+    return {"stats": json.loads(Path(path).read_text())}
 
 
 def render_cell_reasons_legend(cell_reasons, rows):
@@ -781,6 +805,8 @@ def main():
     parser.add_argument("--env-html", required=True)
     parser.add_argument("--cell-reasons", required=False, default=None,
                         help="Optional cell_reasons.json (default: render the matrix bare)")
+    parser.add_argument("--cell-stats", required=False, default=None,
+                        help="Optional cell_stats.json (default: no ±CV annotations)")
     args = parser.parse_args()
 
     html = args.template.read_text()
@@ -793,6 +819,7 @@ def main():
     organic_split_random_data = build_organic_split_data(args.report_dir, prefix="organic_split_random")
     winners_rows = compute_winners_matrix(raw_data)
     cell_reasons = load_cell_reasons(args.cell_reasons)
+    cell_stats = load_cell_stats(args.cell_stats)
 
     html = html.replace(args.template_id, args.report_id)
 
@@ -923,7 +950,7 @@ def main():
     tbody_start = html.index(tbody_marker)
     tbody_content_start = tbody_start + len('<tbody class="divide-y divide-slate-100">\n')
     tbody_end = html.index("</tbody>", tbody_content_start)
-    html = html[:tbody_content_start] + render_winners_matrix_html(winners_rows, cell_reasons) + "\n" + html[tbody_end:]
+    html = html[:tbody_content_start] + render_winners_matrix_html(winners_rows, cell_reasons, cell_stats) + "\n" + html[tbody_end:]
 
     # Reason legend: inside the Winners section, right below the matrix table.
     # Strip any block a previous run left behind first (idempotent reruns).
