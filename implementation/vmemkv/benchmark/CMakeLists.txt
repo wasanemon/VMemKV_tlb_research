@@ -24,3 +24,4 @@ add_executable(churn_scan_probe churn_scan_probe.cpp)
 target_link_libraries(churn_scan_probe PRIVATE vmemkv vmemkv_headers)
 
 vmemkv_link_rival_backends(bench_kv)
+vmemkv_link_rival_backends(churn_scan_probe)

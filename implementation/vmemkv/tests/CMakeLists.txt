@@ -16,4 +16,6 @@ add_test(NAME test_kv_store COMMAND test_kv_store --duration=true)
 # a healthy run, not a budget to fill -- CI runner time isn't free. It's also comfortably past the
 # 300s mark where ci.yml's watchdog dumps thread backtraces if the process is still alive, so a
 # genuine hang still gets diagnosed (via the watchdog) well before this kills it.
-set_tests_properties(test_kv_store PROPERTIES TIMEOUT 600)
+# LEANSTORE_DRAM_GIB=1: unit-test corpora are tiny; the LeanStore adapter defaults
+# to a 16GiB buffer pool that small runners cannot allocate.
+set_tests_properties(test_kv_store PROPERTIES TIMEOUT 600 ENVIRONMENT "LEANSTORE_DRAM_GIB=1")

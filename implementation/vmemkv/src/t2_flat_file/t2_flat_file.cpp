@@ -28,7 +28,8 @@ constexpr uint64_t kPageBytes = 4096;
 // docs/benchmark/20260921_scan64_readahead_regression.md). Sub-page skips hold no
 // record and are never reused (bytes_used only grows), so they stay zero-filled
 // sparse holes the punch path already treats as hollow.
-uint64_t page_skip_bytes(uint64_t frontier, uint64_t required) noexcept {
+// NOLINTNEXTLINE(bugprone-easily-swappable-parameters)
+auto page_skip_bytes(uint64_t frontier, uint64_t required) noexcept -> uint64_t {
   const uint64_t misalignment = frontier % kPageBytes;
   if (misalignment == 0) {
     return 0;
