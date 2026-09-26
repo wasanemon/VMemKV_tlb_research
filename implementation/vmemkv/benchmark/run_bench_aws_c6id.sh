@@ -657,6 +657,23 @@ set_ltm_pass_env() {
   vmemkv_forward_env LTM_PASS_WINTIME_PREFIX VMEMKV_BENCH_INSERT_TIME_BUDGET_SECONDS VMEMKV_BENCH_DELETE_TIME_BUDGET_SECONDS
 }
 
+# Retried scp for result downloads: a single dropped SSH connection after hours of
+# measurement must not strand the data. Fails loudly only after N attempts (so a
+# genuinely dead instance still fails the run instead of hanging forever).
+scp_retry() {
+  local attempts=3 delay_seconds=15 attempt
+  for ((attempt = 1; attempt <= attempts; attempt++)); do
+    if scp "$@"; then
+      return 0
+    fi
+    if [[ "$attempt" -lt "$attempts" ]]; then
+      echo "[runner] scp attempt $attempt/$attempts failed -- retrying in ${delay_seconds}s ..." >&2
+      sleep "$delay_seconds"
+    fi
+  done
+  return 1
+}
+
 # Runs one ssh invocation with stdout/stderr teed to the given logs (mirrored to this
 # shell's own stdout/stderr as well). Returns ssh's exit status, so callers under
 # `set -e` must capture it with `|| status=$?`. Centralizes the set +e/PIPESTATUS
@@ -762,6 +779,15 @@ run_ltm_isolated_groups() {
 
   local -a group_result_paths=()
   local group_idx=0 identity group_names group_filter group_result_path group_remote_cmd group_remote_cmd_quoted group_status want_off
+  # Per-group stage downloads: each group's JSON is scp'd locally right after it
+  # succeeds, so a later Spot interruption loses at most the in-flight group. The
+  # end-of-run merge below still reads the remote files when the instance survives;
+  # when it does not, merge these stages by hand (one jq -s call, same expression)
+  # and rerun only the missing identities via a custom filter. Best-effort: a failed
+  # stage download must never fail the measurement itself.
+  local stage_dir="${RESULTS_DIR:-/tmp}/groups_${KEY_NAME}"
+  mkdir -p "$stage_dir"
+  local stage_label="${label//[^a-zA-Z0-9_]/_}"
   for identity in "${ordered_identities[@]}"; do
     group_idx=$((group_idx + 1))
     group_names="$(printf '%s\n' "$identity" | sed -E 's/[][(){}.^$*+?\\|]/\\&/g')"
@@ -812,6 +838,8 @@ ${LTM_PASS_YPOP_PREFIX:+${LTM_PASS_YPOP_PREFIX} }${LTM_PASS_QUIESCE_PREFIX:+${LT
       echo "[ERROR] LTM ${label} for ${identity} failed with exit code $group_status" >&2
       return "$group_status"
     fi
+    scp $SSH_OPTS "ubuntu@$PUBLIC_IP:${group_result_path}" "${stage_dir}/group_${stage_label}_${group_idx}.json" \
+      >>"$stdout_log" 2>>"$stderr_log" || echo "[runner] WARNING: stage download failed for group ${group_idx} (${identity}) -- continuing" >&2
   done
 
   local merge_paths_quoted="" p
@@ -1264,7 +1292,7 @@ if [[ "$SKIP_MATRIX" != "true" ]]; then
     if [[ -n "$VALUE_SIZE_LIMIT" ]]; then
       dst_name="results_in_memory_${VALUE_SIZE_LIMIT}${without_rivals_suffix}${leanstore_only_suffix}.json"
     fi
-    scp $SSH_OPTS "ubuntu@$PUBLIC_IP:$(vmemkv_matrix::scenario_result_path in_memory)" "${RESULTS_DIR}/${dst_name}"
+    scp_retry $SSH_OPTS "ubuntu@$PUBLIC_IP:$(vmemkv_matrix::scenario_result_path in_memory)" "${RESULTS_DIR}/${dst_name}"
   fi
 
   if [[ "$SCENARIO_LIMIT" == "ltm" || "$SCENARIO_LIMIT" == "all" ]]; then
@@ -1272,7 +1300,7 @@ if [[ "$SKIP_MATRIX" != "true" ]]; then
     if [[ -n "$VALUE_SIZE_LIMIT" ]]; then
       dst_name="results_ltm_${VALUE_SIZE_LIMIT}${without_rivals_suffix}${leanstore_only_suffix}.json"
     fi
-    scp $SSH_OPTS "ubuntu@$PUBLIC_IP:$(vmemkv_matrix::scenario_result_path ltm)" "${RESULTS_DIR}/${dst_name}"
+    scp_retry $SSH_OPTS "ubuntu@$PUBLIC_IP:$(vmemkv_matrix::scenario_result_path ltm)" "${RESULTS_DIR}/${dst_name}"
   fi
 
   # Headline error-bar passes (if requested): standalone files, never merged into the above.
