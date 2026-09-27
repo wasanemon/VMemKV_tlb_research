@@ -136,6 +136,76 @@ def build_raw_data(report_dir):
     return raw_data
 
 
+def build_headline_data(report_dir):
+    """Per (scenario_key, workload, label, thread index): items_per_second sample SD from
+    same-campaign headline repetitions (results_{scenario}_{val_size}_headline.json, Google
+    Benchmark stddev aggregates over 3 repetitions). Plotted centers stay on the main-matrix
+    single runs (Winners-table consistency); the SD only sets whisker width. Files or cells
+    without headline coverage yield no entries and render bare."""
+    headline_data = {}
+    for (scenario, val_size), scenario_key in SCENARIO_LABELS.items():
+        fname = report_dir / f"results_{scenario}_{val_size}_headline.json"
+        if not fname.exists():
+            continue
+        data = json.loads(fname.read_text())
+        for b in data["benchmarks"]:
+            if b.get("run_type") != "aggregate" or b.get("aggregate_name") != "stddev":
+                continue
+            store, variant, workload, threads = parse_bench_name(b["run_name"])
+            if workload is None or threads not in THREADS:
+                continue
+            label = STORE_VARIANT_TO_LABEL.get((store, variant))
+            if label is None:
+                continue
+            sd = b.get("items_per_second", 0.0)
+            (headline_data.setdefault(scenario_key, {}).setdefault(workload, {}).setdefault(label, {})
+             [THREADS.index(threads)]) = sd
+    return headline_data
+
+
+# Inline Chart.js plugin drawing headline whiskers (main-run value ± headline SD) on points
+# carrying a headlineSd entry. Dependency-free: the report pages already load Chart.js from
+# CDN, and a vendored error-bar plugin would add a second version-pinned dependency for one
+# whisker shape.
+HEADLINE_ERRORBAR_PLUGIN_JS = """    // Headline error bars: whiskers at the plotted value ± headline SD (n=3 same-build
+    // repetitions) on max-thread points with headline coverage; all other points render bare.
+    Chart.register({
+      id: 'headlineErrorBars',
+      afterDatasetsDraw(chart) {
+        const yScale = chart.scales.y;
+        if (!yScale) return;
+        chart.data.datasets.forEach((d, i) => {
+          const sds = d.headlineSd;
+          if (!sds) return;
+          const meta = chart.getDatasetMeta(i);
+          if (meta.hidden) return;
+          meta.data.forEach((pt, idx) => {
+            const sd = sds[idx];
+            if (sd == null || !(sd > 0)) return;
+            const v = d.data[idx];
+            if (v == null) return;
+            const col = (typeof d.borderColor === 'string') ? d.borderColor : '#6366f1';
+            const x = pt.x;
+            const yHi = yScale.getPixelForValue(v + sd);
+            const yLo = yScale.getPixelForValue(v - sd);
+            const c = chart.ctx;
+            const cap = 4;
+            c.save();
+            c.strokeStyle = col;
+            c.lineWidth = 1.5;
+            c.beginPath();
+            c.moveTo(x, yHi); c.lineTo(x, yLo);
+            c.moveTo(x - cap, yHi); c.lineTo(x + cap, yHi);
+            c.moveTo(x - cap, yLo); c.lineTo(x + cap, yLo);
+            c.stroke();
+            c.restore();
+          });
+        });
+      }
+    });
+"""
+
+
 def _normalize_value_size(file_val_size):
     # bench_kv writes e.g. "1KB_20__8B_" for the 80/20-mix value-size label -- normalize
     # to the plain "1KB"/"64KB"/"8B" keys used elsewhere (SCENARIO_LABELS).
@@ -805,6 +875,9 @@ def main():
                         help="Optional cell_reasons.json (default: render the matrix bare)")
     parser.add_argument("--cell-stats", required=False, default=None,
                         help="Optional cell_stats.json (default: no ±CV annotations)")
+    parser.add_argument("--headline-error-bars", action="store_true",
+                        help="Draw headline whiskers (main-run value ± headline SD, n=3) on "
+                             "max-thread points with results_*_headline.json coverage")
     args = parser.parse_args()
 
     html = args.template.read_text()
@@ -829,6 +902,8 @@ def main():
     html = replace_block(
         html, "const rawData = {", "const timelineData = {",
         "const rawData = " + json.dumps(raw_data, indent=2) + ";\n    "
+        + ("const headlineErrorBars = " + json.dumps(build_headline_data(args.report_dir), indent=2)
+           + ";\n    " if args.headline_error_bars else "")
     )
     html = replace_block(
         html, "const timelineData = {", "const workloads =",
@@ -862,6 +937,10 @@ def main():
         (f"results_in_memory_1KB.json", "In-mem 1KB"),
         (f"results_ltm_1KB.json", "LTM 1KB"),
         (f"results_ltm_64KB.json", "LTM 64KB"),
+        (f"results_in_memory_8B_headline.json", "Headline err bars, In-mem 8B"),
+        (f"results_in_memory_1KB_headline.json", "Headline err bars, In-mem 1KB"),
+        (f"results_ltm_1KB_headline.json", "Headline err bars, LTM 1KB"),
+        (f"results_ltm_64KB_headline.json", "Headline err bars, LTM 64KB"),
         (f"background_jobs_in_memory.jsonl", "Background Jobs, In-Memory"),
         (f"background_jobs_ltm.jsonl", "Background Jobs, LTM"),
     ]:
@@ -875,6 +954,10 @@ def main():
 
     desc_start = html.index('<p class="text-slate-500 text-sm max-w-3xl">')
     desc_end = html.index("</p>", desc_start) + len("</p>")
+    # Consume any orphaned extra closings a previous generation left behind, so repeated
+    # regenerations converge instead of accumulating "</p>" cruft.
+    while html[desc_end:desc_end + len("</p>")] == "</p>":
+        desc_end += len("</p>")
     html = html[:desc_start] + f'<p class="text-slate-500 text-sm max-w-3xl">{args.description_html}</p>' + html[desc_end:]
 
     # Environment section: replace the <ul> under "Environment" heading.
@@ -899,6 +982,38 @@ def main():
                       lambda m: "const variantMarkers = " + json.dumps(VARIANT_MARKERS) + ";", html, count=1)
     if n == 0:
         print("warning: template lacks variantMarkers const -- markers fall back to circle")
+
+    if args.headline_error_bars:
+        # Inline whisker plugin (no new dependency) plus per-point SD plumbing. Each step is
+        # warn-only: a template predating the expected scaffolding still generates a bare report.
+        anchor = "function makeChartConfig(valSize, op) {"
+        if anchor not in html:
+            print("warning: template lacks makeChartConfig -- headline error bars not drawn")
+        else:
+            html = html.replace(anchor, HEADLINE_ERRORBAR_PLUGIN_JS + "\n    " + anchor, 1)
+        old_dataset, n_dataset = re.subn(
+            r"(\s+)data: opData\[variantName\],",
+            lambda m: (m.group(0) + "\n" + m.group(1)
+                       + "headlineSd: (((headlineErrorBars[valSize] || {})[op] || {})[variantName] || {}),"),
+            html, count=1)
+        if n_dataset == 0:
+            print("warning: template lacks opData dataset -- headline SD not attached")
+        else:
+            html = old_dataset
+        old_tip, n_tip = re.subn(
+            r"const fv = formatVal\(v\);",
+            lambda m: (m.group(0)
+                       + "\n                  const _hsd = (((headlineErrorBars[valSize] || {})[op] || {})[label] || {})[context.dataIndex];"
+                       + "\n                  const _herr = (_hsd != null && _hsd > 0) ? ` ±${formatVal(_hsd)} (n=3)` : '';"),
+            html, count=1)
+        if n_tip == 0:
+            print("warning: template lacks tooltip formatVal -- headline SD not shown in tooltips")
+        else:
+            html = old_tip
+            n_lbl = html.count(" ${label}: ${fv}/s")
+            html = html.replace(" ${label}: ${fv}/s", " ${label}: ${fv}/s${_herr}")
+            if n_lbl == 0:
+                print("warning: template lacks tooltip label returns -- headline SD not shown in tooltips")
 
     # Stacking Variants legend: the currently measured set only.
     stacking_marker = "Stacking Variants"

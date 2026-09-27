@@ -44,11 +44,15 @@
           <a href="../20260926_quiesce/results_in_memory_1KB.json" download class="inline-flex items-center gap-1 text-xs text-slate-500 bg-slate-100 rounded px-2.5 py-1.5 hover:bg-slate-200"><i data-lucide="download" class="w-3.5 h-3.5"></i> Raw JSON (In-mem 1KB)</a>
           <a href="../20260926_quiesce/results_ltm_1KB.json" download class="inline-flex items-center gap-1 text-xs text-slate-500 bg-slate-100 rounded px-2.5 py-1.5 hover:bg-slate-200"><i data-lucide="download" class="w-3.5 h-3.5"></i> Raw JSON (LTM 1KB)</a>
           <a href="../20260926_quiesce/results_ltm_64KB.json" download class="inline-flex items-center gap-1 text-xs text-slate-500 bg-slate-100 rounded px-2.5 py-1.5 hover:bg-slate-200"><i data-lucide="download" class="w-3.5 h-3.5"></i> Raw JSON (LTM 64KB)</a>
+          <a href="../20260926_quiesce/results_in_memory_8B_headline.json" download class="inline-flex items-center gap-1 text-xs text-slate-500 bg-slate-100 rounded px-2.5 py-1.5 hover:bg-slate-200"><i data-lucide="download" class="w-3.5 h-3.5"></i> Raw JSON (Headline err bars, In-mem 8B)</a>
+          <a href="../20260926_quiesce/results_in_memory_1KB_headline.json" download class="inline-flex items-center gap-1 text-xs text-slate-500 bg-slate-100 rounded px-2.5 py-1.5 hover:bg-slate-200"><i data-lucide="download" class="w-3.5 h-3.5"></i> Raw JSON (Headline err bars, In-mem 1KB)</a>
+          <a href="../20260926_quiesce/results_ltm_1KB_headline.json" download class="inline-flex items-center gap-1 text-xs text-slate-500 bg-slate-100 rounded px-2.5 py-1.5 hover:bg-slate-200"><i data-lucide="download" class="w-3.5 h-3.5"></i> Raw JSON (Headline err bars, LTM 1KB)</a>
+          <a href="../20260926_quiesce/results_ltm_64KB_headline.json" download class="inline-flex items-center gap-1 text-xs text-slate-500 bg-slate-100 rounded px-2.5 py-1.5 hover:bg-slate-200"><i data-lucide="download" class="w-3.5 h-3.5"></i> Raw JSON (Headline err bars, LTM 64KB)</a>
           <a href="../20260926_quiesce/background_jobs_in_memory.jsonl" download class="inline-flex items-center gap-1 text-xs text-slate-500 bg-slate-100 rounded px-2.5 py-1.5 hover:bg-slate-200"><i data-lucide="download" class="w-3.5 h-3.5"></i> Raw JSONL (Background Jobs, In-Memory)</a>
           <a href="../20260926_quiesce/background_jobs_ltm.jsonl" download class="inline-flex items-center gap-1 text-xs text-slate-500 bg-slate-100 rounded px-2.5 py-1.5 hover:bg-slate-200"><i data-lucide="download" class="w-3.5 h-3.5"></i> Raw JSONL (Background Jobs, LTM)</a>
         </div>
       </div>
-      <p class="text-slate-500 text-sm max-w-3xl">Frozen code 8fc85c5 with clone quiesce and WAL separation standard on LTM passes. Full matrix re-measured 2026-09-25/26 on i4i.8xlarge (split-MGLRU, per-cell isolation, all rivals fresh). LTM-1KB matrix recovered complete (297/297) from per-group staged downloads after two Spot interruptions at the finish line; its headline tail is partial (57 cells) and LTM-1KB YCSB timelines are missing.</p></p></p></p></p></p></p></p>
+      <p class="text-slate-500 text-sm max-w-3xl">Frozen code 8fc85c5 with clone quiesce and WAL separation standard on LTM passes. Full matrix re-measured 2026-09-25/26 on i4i.8xlarge (split-MGLRU, per-cell isolation, all rivals fresh). LTM-1KB matrix recovered complete (297/297) from per-group staged downloads after two Spot interruptions at the finish line; its headline tail is partial (57 cells) and LTM-1KB YCSB timelines are missing. Max-thread points carry headline whiskers (main-run value ± SD over 3 same-build repetitions); all other points are single runs. 24 LTM-1KB VMemKV cells have no headline coverage and render bare.</p>
     </header>
 
     <section class="grid grid-cols-1 md:grid-cols-2 gap-6 text-xs bg-slate-50 border border-slate-200 rounded-xl p-5">
@@ -2984,6 +2988,853 @@
         null,
         2708.686610019563
       ]
+    }
+  }
+};
+    const headlineErrorBars = {
+  "8B_In-Memory": {
+    "Insert": {
+      "RocksDB": {
+        "3": 1439.9505438871997
+      },
+      "Baseline": {
+        "3": 434.2785027591833
+      },
+      "+BF": {
+        "3": 56.40563988122091
+      },
+      "+Inline": {
+        "3": 244.72640627700576
+      },
+      "RocksDB-BlobDB": {
+        "3": 371.27241195698923
+      },
+      "LMDB": {
+        "3": 13.275802437238474
+      },
+      "LeanStore": {
+        "3": 248.28757206321328
+      }
+    },
+    "Get_Hit_Zipf": {
+      "RocksDB": {
+        "3": 3076.150045326091
+      },
+      "Baseline": {
+        "3": 91529.04519328487
+      },
+      "+BF": {
+        "3": 49025.23915673052
+      },
+      "+Inline": {
+        "3": 9367.08972886107
+      },
+      "RocksDB-BlobDB": {
+        "3": 22196.318001883523
+      },
+      "LMDB": {
+        "3": 234750.4761199824
+      },
+      "LeanStore": {
+        "3": 43111.02663581064
+      }
+    },
+    "Get_Hit_Uniform": {
+      "RocksDB": {
+        "3": 2889.0463298603513
+      },
+      "Baseline": {
+        "3": 28554.244401310956
+      },
+      "+BF": {
+        "3": 10839.83622568971
+      },
+      "+Inline": {
+        "3": 40064.80103592779
+      },
+      "RocksDB-BlobDB": {
+        "3": 138830.4766632557
+      },
+      "LMDB": {
+        "3": 25360.804255002546
+      },
+      "LeanStore": {
+        "3": 14413.345724909152
+      }
+    },
+    "Get_Miss": {
+      "RocksDB": {
+        "3": 16457.396862276048
+      },
+      "Baseline": {
+        "3": 32775.56402332958
+      },
+      "+BF": {
+        "3": 53047.24718365289
+      },
+      "+Inline": {
+        "3": 29894.022485179335
+      },
+      "RocksDB-BlobDB": {
+        "3": 29312.397176656472
+      },
+      "LMDB": {
+        "3": 86831.27407358061
+      },
+      "LeanStore": {
+        "3": 8996.354579005018
+      }
+    },
+    "Update": {
+      "RocksDB": {
+        "3": 1305.0679482846751
+      },
+      "Baseline": {
+        "3": 1096.9673458827276
+      },
+      "+BF": {
+        "3": 322.8070737399017
+      },
+      "+Inline": {
+        "3": 2273.1841656016286
+      },
+      "RocksDB-BlobDB": {
+        "3": 756.8722589199591
+      },
+      "LMDB": {
+        "3": 789.5572826233039
+      },
+      "LeanStore": {
+        "3": 647.3506426302622
+      }
+    },
+    "YCSB_E": {
+      "RocksDB": {
+        "3": 40187.572823590504
+      },
+      "Baseline": {
+        "3": 1003062.5961290614
+      },
+      "+BF": {
+        "3": 1006168.3773498057
+      },
+      "+Inline": {
+        "3": 1177756.2217114642
+      },
+      "RocksDB-BlobDB": {
+        "3": 41199.64072567154
+      },
+      "LMDB": {
+        "3": 88092.6760129916
+      },
+      "LeanStore": {
+        "3": 10558.786478306936
+      }
+    },
+    "Delete": {
+      "RocksDB": {
+        "3": 223.39156582670202
+      },
+      "Baseline": {
+        "3": 326.9429641407759
+      },
+      "+BF": {
+        "3": 2372.79763066034
+      },
+      "+Inline": {
+        "3": 2387.894025133618
+      },
+      "RocksDB-BlobDB": {
+        "3": 157.98635172830723
+      },
+      "LMDB": {
+        "3": 247.3711769274897
+      },
+      "LeanStore": {
+        "3": 1070.9176580829553
+      }
+    },
+    "Scan_Zipf": {
+      "RocksDB": {
+        "3": 42.53100570937344
+      },
+      "Baseline": {
+        "3": 4535.064415785554
+      },
+      "+BF": {
+        "3": 2410.0964880024994
+      },
+      "+Inline": {
+        "3": 2279.048464988107
+      },
+      "RocksDB-BlobDB": {
+        "3": 341.1986188418167
+      },
+      "LMDB": {
+        "3": 22100.289441345976
+      },
+      "LeanStore": {
+        "3": 11334.271370247214
+      }
+    },
+    "Scan_Uniform": {
+      "RocksDB": {
+        "3": 1019.4786980471
+      },
+      "Baseline": {
+        "3": 4908.151097636106
+      },
+      "+BF": {
+        "3": 8276.27802052511
+      },
+      "+Inline": {
+        "3": 8657.713441513824
+      },
+      "RocksDB-BlobDB": {
+        "3": 31.473762460040795
+      },
+      "LMDB": {
+        "3": 29874.110071985928
+      },
+      "LeanStore": {
+        "3": 3929.027601097019
+      }
+    }
+  },
+  "1KB_In-Memory": {
+    "Insert": {
+      "RocksDB": {
+        "3": 328.5278681200776
+      },
+      "Baseline": {
+        "3": 1700.4749167548675
+      },
+      "+BF": {
+        "3": 332.4449740402788
+      },
+      "+Inline": {
+        "3": 2182.397787252065
+      },
+      "RocksDB-BlobDB": {
+        "3": 168.35346536897384
+      },
+      "LMDB": {
+        "3": 20.512013984744808
+      },
+      "LeanStore": {
+        "3": 62.742978693244964
+      }
+    },
+    "Get_Hit_Zipf": {
+      "RocksDB": {
+        "3": 3907.009787853607
+      },
+      "Baseline": {
+        "3": 62546.514756537326
+      },
+      "+BF": {
+        "3": 32058.18632050901
+      },
+      "+Inline": {
+        "3": 10612.456423825482
+      },
+      "RocksDB-BlobDB": {
+        "3": 1302.2665559065383
+      },
+      "LMDB": {
+        "3": 88225.10493572026
+      },
+      "LeanStore": {
+        "3": 77766.06205509003
+      }
+    },
+    "Get_Hit_Uniform": {
+      "RocksDB": {
+        "3": 3639.022430831602
+      },
+      "Baseline": {
+        "3": 67790.13331288593
+      },
+      "+BF": {
+        "3": 87380.81627360976
+      },
+      "+Inline": {
+        "3": 106568.23614210272
+      },
+      "RocksDB-BlobDB": {
+        "3": 12405.454545143291
+      },
+      "LMDB": {
+        "3": 79997.97021568511
+      },
+      "LeanStore": {
+        "3": 202608.3079079028
+      }
+    },
+    "Get_Miss": {
+      "RocksDB": {
+        "3": 84861.41263484114
+      },
+      "Baseline": {
+        "3": 328026.4289634966
+      },
+      "+BF": {
+        "3": 687834.2756847523
+      },
+      "+Inline": {
+        "3": 247337.46966912123
+      },
+      "RocksDB-BlobDB": {
+        "3": 22995.843536813092
+      },
+      "LMDB": {
+        "3": 209889.83351362898
+      },
+      "LeanStore": {
+        "3": 8945.641724302664
+      }
+    },
+    "Update": {
+      "RocksDB": {
+        "3": 852.8899935956413
+      },
+      "Baseline": {
+        "3": 964.2173903996097
+      },
+      "+BF": {
+        "3": 2751.139543102556
+      },
+      "+Inline": {
+        "3": 627.7384253937737
+      },
+      "RocksDB-BlobDB": {
+        "3": 1686.4226991269527
+      },
+      "LMDB": {
+        "3": 149.28401598000548
+      },
+      "LeanStore": {
+        "3": 891.5056776267534
+      }
+    },
+    "YCSB_E": {
+      "RocksDB": {
+        "3": 15571.971851510842
+      },
+      "Baseline": {
+        "3": 51079.591616248515
+      },
+      "+BF": {
+        "3": 54993.009054464754
+      },
+      "+Inline": {
+        "3": 54247.94749206772
+      },
+      "RocksDB-BlobDB": {
+        "3": 61.61026363799659
+      },
+      "LMDB": {
+        "3": 44441.94707458225
+      },
+      "LeanStore": {
+        "3": 18642.871542902336
+      }
+    },
+    "Delete": {
+      "RocksDB": {
+        "3": 483.8750861192565
+      },
+      "Baseline": {
+        "3": 610.1605396012677
+      },
+      "+BF": {
+        "3": 476.83729018943114
+      },
+      "+Inline": {
+        "3": 275.44903327696977
+      },
+      "RocksDB-BlobDB": {
+        "3": 213.76709960074933
+      },
+      "LMDB": {
+        "3": 17.230365414549443
+      },
+      "LeanStore": {
+        "3": 767.665883913896
+      }
+    },
+    "Scan_Zipf": {
+      "RocksDB": {
+        "3": 153.6619099163258
+      },
+      "Baseline": {
+        "3": 227.30841080809031
+      },
+      "+BF": {
+        "3": 229.3327428482113
+      },
+      "+Inline": {
+        "3": 617.6105078464465
+      },
+      "RocksDB-BlobDB": {
+        "3": 11.075772609822932
+      },
+      "LMDB": {
+        "3": 1651.1713031829775
+      },
+      "LeanStore": {
+        "3": 28853.45945369164
+      }
+    },
+    "Scan_Uniform": {
+      "RocksDB": {
+        "3": 273.4358813737115
+      },
+      "Baseline": {
+        "3": 398.0532762822566
+      },
+      "+BF": {
+        "3": 811.1695573890348
+      },
+      "+Inline": {
+        "3": 480.80378264416174
+      },
+      "RocksDB-BlobDB": {
+        "3": 32.983295272673416
+      },
+      "LMDB": {
+        "3": 309.16204321000527
+      },
+      "LeanStore": {
+        "3": 37911.69631365214
+      }
+    }
+  },
+  "1KB_LTM": {
+    "Delete": {
+      "LMDB": {
+        "3": 268.14714267736724
+      },
+      "LeanStore": {
+        "3": 1181.0692634253821
+      },
+      "RocksDB-BlobDB": {
+        "3": 4722.162927237181
+      },
+      "RocksDB": {
+        "3": 8575.676358936513
+      },
+      "Baseline": {
+        "3": 2032.5025428746542
+      },
+      "+PinRandom": {
+        "3": 456.08038509755244
+      },
+      "+PinSeq": {
+        "3": 125.49026987988321
+      }
+    },
+    "Get_Hit_Uniform": {
+      "LeanStore": {
+        "3": 1753.7440615215226
+      },
+      "LMDB": {
+        "3": 773.3136718403774
+      },
+      "RocksDB-BlobDB": {
+        "3": 532.9595957534409
+      },
+      "RocksDB": {
+        "3": 201.92140514165857
+      },
+      "Baseline": {
+        "3": 7489.021242659481
+      },
+      "+PinRandom": {
+        "3": 5748.334335929813
+      },
+      "+PinSeq": {
+        "3": 2536.8297191760653
+      }
+    },
+    "Get_Hit_Zipf": {
+      "LeanStore": {
+        "3": 13871.215127818066
+      },
+      "RocksDB-BlobDB": {
+        "3": 5718.474733174777
+      },
+      "LMDB": {
+        "3": 1342.0336502926546
+      },
+      "RocksDB": {
+        "3": 4796.900768807675
+      },
+      "Baseline": {
+        "3": 15805.14171889064
+      },
+      "+PinRandom": {
+        "3": 2247.0475884841985
+      },
+      "+PinSeq": {
+        "3": 7162.5273900322845
+      }
+    },
+    "Get_Miss": {
+      "LeanStore": {
+        "3": 4532.9906750501395
+      },
+      "RocksDB-BlobDB": {
+        "3": 99292.13231846702
+      },
+      "RocksDB": {
+        "3": 20874.550986174985
+      },
+      "LMDB": {
+        "3": 22140.90494678172
+      },
+      "Baseline": {
+        "3": 54498.39232073232
+      },
+      "+PinRandom": {
+        "3": 43763.45285997382
+      }
+    },
+    "Insert": {
+      "LeanStore": {
+        "3": 1303.3705866579298
+      },
+      "RocksDB-BlobDB": {
+        "3": 1271.772979420355
+      },
+      "RocksDB": {
+        "3": 685.4579052865487
+      },
+      "Baseline": {
+        "3": 24357.63669833789
+      },
+      "LMDB": {
+        "3": 81.91750321356193
+      },
+      "+PinRandom": {
+        "3": 22512.706477679774
+      }
+    },
+    "Scan_Uniform": {
+      "LeanStore": {
+        "3": 55.784070927756886
+      },
+      "RocksDB-BlobDB": {
+        "3": 313.3648772118745
+      },
+      "RocksDB": {
+        "3": 29.505650473695557
+      },
+      "Baseline": {
+        "3": 1855.8361900328428
+      },
+      "+PinRandom": {
+        "3": 163.72325263941786
+      },
+      "LMDB": {
+        "3": 150.47801057241875
+      }
+    },
+    "Scan_Zipf": {
+      "LeanStore": {
+        "3": 379.9006678384028
+      },
+      "RocksDB-BlobDB": {
+        "3": 339.52054371206066
+      },
+      "RocksDB": {
+        "3": 284.0379274707261
+      },
+      "Baseline": {
+        "3": 1704.6831925808208
+      },
+      "+PinRandom": {
+        "3": 1904.3221235512676
+      },
+      "LMDB": {
+        "3": 1819.817610290593
+      }
+    },
+    "Update": {
+      "LeanStore": {
+        "3": 8447.945743683928
+      },
+      "RocksDB-BlobDB": {
+        "3": 7113.761418609199
+      },
+      "RocksDB": {
+        "3": 8010.6707798396
+      },
+      "Baseline": {
+        "3": 3373.418065074158
+      },
+      "+PinRandom": {
+        "3": 3294.3927434734082
+      },
+      "LMDB": {
+        "3": 382.38610588103126
+      }
+    },
+    "YCSB_E": {
+      "LeanStore": {
+        "3": 47.21420539292694
+      },
+      "RocksDB-BlobDB": {
+        "3": 269.499426143319
+      },
+      "RocksDB": {
+        "3": 3899.255193721352
+      },
+      "Baseline": {
+        "3": 3571.366957955572
+      },
+      "+PinRandom": {
+        "3": 759.4946038142743
+      },
+      "LMDB": {
+        "3": 671.8398525838248
+      }
+    }
+  },
+  "64KB_LTM": {
+    "Delete": {
+      "LMDB": {
+        "3": 147.49144911242067
+      },
+      "RocksDB-BlobDB": {
+        "3": 575.247059514591
+      },
+      "RocksDB": {
+        "3": 74.22557944823814
+      },
+      "Baseline": {
+        "3": 1190.3491096392459
+      },
+      "+PinRandom": {
+        "3": 3178.2880622269663
+      },
+      "+PinSeq": {
+        "3": 3199.0640485134613
+      },
+      "+Inline": {
+        "3": 7355.875119654065
+      },
+      "+BF": {
+        "3": 1766.8722229850664
+      }
+    },
+    "Get_Hit_Uniform": {
+      "LMDB": {
+        "3": 645.8702257339066
+      },
+      "RocksDB-BlobDB": {
+        "3": 1980.713057338502
+      },
+      "RocksDB": {
+        "3": 3649.8407166872826
+      },
+      "Baseline": {
+        "3": 3976.6632638587166
+      },
+      "+PinRandom": {
+        "3": 230.42044383886827
+      },
+      "+PinSeq": {
+        "3": 2118.540811626909
+      },
+      "+Inline": {
+        "3": 4337.845838523752
+      },
+      "+BF": {
+        "3": 4099.173448834583
+      }
+    },
+    "Get_Hit_Zipf": {
+      "LMDB": {
+        "3": 3389.1399070886223
+      },
+      "RocksDB-BlobDB": {
+        "3": 208.29605031341345
+      },
+      "RocksDB": {
+        "3": 375.62491196623273
+      },
+      "Baseline": {
+        "3": 5108.7653252543905
+      },
+      "+PinRandom": {
+        "3": 1848.7032364452332
+      },
+      "+PinSeq": {
+        "3": 8498.977623117436
+      },
+      "+Inline": {
+        "3": 8783.376076010054
+      },
+      "+BF": {
+        "3": 18162.19356726613
+      }
+    },
+    "Get_Miss": {
+      "LMDB": {
+        "3": 146297.14041137593
+      },
+      "RocksDB-BlobDB": {
+        "3": 1559249.9129651159
+      },
+      "RocksDB": {
+        "3": 8691.293286753507
+      },
+      "Baseline": {
+        "3": 73419.24708442905
+      },
+      "+PinRandom": {
+        "3": 71125.8534228428
+      },
+      "+PinSeq": {
+        "3": 22168.83321517204
+      },
+      "+Inline": {
+        "3": 30216.25056511634
+      },
+      "+BF": {
+        "3": 31566.892595345234
+      }
+    },
+    "Insert": {
+      "LMDB": {
+        "3": 31.93602086725684
+      },
+      "RocksDB-BlobDB": {
+        "3": 361.42815426911454
+      },
+      "RocksDB": {
+        "3": 49.64129266499279
+      },
+      "Baseline": {
+        "3": 3120.662763415678
+      },
+      "+PinRandom": {
+        "3": 1626.6414328501535
+      },
+      "+PinSeq": {
+        "3": 122.23434101853434
+      },
+      "+Inline": {
+        "3": 411.5490624331348
+      },
+      "+BF": {
+        "3": 1377.2472309350978
+      }
+    },
+    "Scan_Uniform": {
+      "LMDB": {
+        "3": 4.8017330925889485
+      },
+      "RocksDB-BlobDB": {
+        "3": 8.490955904129425
+      },
+      "RocksDB": {
+        "3": 12.7263171548674
+      },
+      "Baseline": {
+        "3": 12.004928304542332
+      },
+      "+PinRandom": {
+        "3": 2.049144814743316
+      },
+      "+PinSeq": {
+        "3": 20.693543087487587
+      },
+      "+Inline": {
+        "3": 9.679953861362366
+      },
+      "+BF": {
+        "3": 11.472100201558067
+      }
+    },
+    "Scan_Zipf": {
+      "LMDB": {
+        "3": 119.77186342196184
+      },
+      "RocksDB-BlobDB": {
+        "3": 2.475155278632244
+      },
+      "RocksDB": {
+        "3": 3.010140479038233
+      },
+      "Baseline": {
+        "3": 68.43353905458538
+      },
+      "+PinRandom": {
+        "3": 13.605187434915678
+      },
+      "+PinSeq": {
+        "3": 29.277669069666757
+      },
+      "+Inline": {
+        "3": 122.63353180788194
+      },
+      "+BF": {
+        "3": 80.43573524857791
+      }
+    },
+    "Update": {
+      "LMDB": {
+        "3": 261.7919854627629
+      },
+      "RocksDB-BlobDB": {
+        "3": 419.3642237827244
+      },
+      "RocksDB": {
+        "3": 693.6552043592478
+      },
+      "Baseline": {
+        "3": 1387.3153409420825
+      },
+      "+PinRandom": {
+        "3": 1317.88268080471
+      },
+      "+PinSeq": {
+        "3": 176.59621669319802
+      },
+      "+Inline": {
+        "3": 1296.3301224237737
+      },
+      "+BF": {
+        "3": 1317.5176472092753
+      }
+    },
+    "YCSB_E": {
+      "LMDB": {
+        "3": 41.224379114591414
+      },
+      "RocksDB-BlobDB": {
+        "3": 1.5947195842876238
+      },
+      "RocksDB": {
+        "3": 18.751633154924733
+      },
+      "Baseline": {
+        "3": 38.899887904486555
+      },
+      "+PinRandom": {
+        "3": 16.363067148219898
+      },
+      "+PinSeq": {
+        "3": 16.114025090472616
+      },
+      "+Inline": {
+        "3": 34.88331448922739
+      },
+      "+BF": {
+        "3": 41.926832649026515
+      }
     }
   }
 };
@@ -8033,6 +8884,43 @@
     }
 
     // ── Workload chart config ──────────────────────────────────────────────────
+        // Headline error bars: whiskers at the plotted value ± headline SD (n=3 same-build
+    // repetitions) on max-thread points with headline coverage; all other points render bare.
+    Chart.register({
+      id: 'headlineErrorBars',
+      afterDatasetsDraw(chart) {
+        const yScale = chart.scales.y;
+        if (!yScale) return;
+        chart.data.datasets.forEach((d, i) => {
+          const sds = d.headlineSd;
+          if (!sds) return;
+          const meta = chart.getDatasetMeta(i);
+          if (meta.hidden) return;
+          meta.data.forEach((pt, idx) => {
+            const sd = sds[idx];
+            if (sd == null || !(sd > 0)) return;
+            const v = d.data[idx];
+            if (v == null) return;
+            const col = (typeof d.borderColor === 'string') ? d.borderColor : '#6366f1';
+            const x = pt.x;
+            const yHi = yScale.getPixelForValue(v + sd);
+            const yLo = yScale.getPixelForValue(v - sd);
+            const c = chart.ctx;
+            const cap = 4;
+            c.save();
+            c.strokeStyle = col;
+            c.lineWidth = 1.5;
+            c.beginPath();
+            c.moveTo(x, yHi); c.lineTo(x, yLo);
+            c.moveTo(x - cap, yHi); c.lineTo(x + cap, yHi);
+            c.moveTo(x - cap, yLo); c.lineTo(x + cap, yLo);
+            c.stroke();
+            c.restore();
+          });
+        });
+      }
+    });
+
     function makeChartConfig(valSize, op) {
       const opData = (rawData[valSize] || {})[op];
       if (!opData) return null;
@@ -8043,6 +8931,8 @@
         return {
           label: variantName,
           data: opData[variantName],
+
+          headlineSd: (((headlineErrorBars[valSize] || {})[op] || {})[variantName] || {}),
           borderColor: col,
           backgroundColor: ctx => {
             const {chartArea, ctx: c} = ctx.chart;
@@ -8099,14 +8989,16 @@
                   const label = context.dataset.label || '';
                   const v = context.raw || 0;
                   const fv = formatVal(v);
-                  if (label === 'RocksDB' || !rocksData) return ` ${label}: ${fv}/s`;
+                  const _hsd = (((headlineErrorBars[valSize] || {})[op] || {})[label] || {})[context.dataIndex];
+                  const _herr = (_hsd != null && _hsd > 0) ? ` ±${formatVal(_hsd)} (n=3)` : '';
+                  if (label === 'RocksDB' || !rocksData) return ` ${label}: ${fv}/s${_herr}`;
                   const rv = rocksData[context.dataIndex] || 0;
-                  if (!rv) return ` ${label}: ${fv}/s`;
+                  if (!rv) return ` ${label}: ${fv}/s${_herr}`;
                   const ratio = v / rv;
                   const badge = ratio >= 1
                     ? ` (+${((ratio-1)*100).toFixed(0)}% vs RDB)`
                     : ` (${((ratio-1)*100).toFixed(0)}% vs RDB)`;
-                  return ` ${label}: ${fv}/s${badge}`;
+                  return ` ${label}: ${fv}/s${_herr}${badge}`;
                 }
               }
             }
