@@ -985,35 +985,45 @@ def main():
 
     if args.headline_error_bars:
         # Inline whisker plugin (no new dependency) plus per-point SD plumbing. Each step is
-        # warn-only: a template predating the expected scaffolding still generates a bare report.
+        # warn-only, and all three are idempotent (guarded by their own markers): a template
+        # predating the expected scaffolding still generates a bare report, and regenerating
+        # over an already-patched report changes nothing.
         anchor = "function makeChartConfig(valSize, op) {"
         if anchor not in html:
             print("warning: template lacks makeChartConfig -- headline error bars not drawn")
+        elif HEADLINE_ERRORBAR_PLUGIN_JS.strip().splitlines()[0] in html:
+            print("note: template already carries the headline plugin -- skipping injection")
         else:
             html = html.replace(anchor, HEADLINE_ERRORBAR_PLUGIN_JS + "\n    " + anchor, 1)
-        old_dataset, n_dataset = re.subn(
-            r"(\s+)data: opData\[variantName\],",
-            lambda m: (m.group(0) + "\n" + m.group(1)
-                       + "headlineSd: (((headlineErrorBars[valSize] || {})[op] || {})[variantName] || {}),"),
-            html, count=1)
-        if n_dataset == 0:
-            print("warning: template lacks opData dataset -- headline SD not attached")
+        if "headlineSd:" in html:
+            print("note: template already attaches headline SD -- skipping")
         else:
-            html = old_dataset
-        old_tip, n_tip = re.subn(
-            r"const fv = formatVal\(v\);",
-            lambda m: (m.group(0)
-                       + "\n                  const _hsd = (((headlineErrorBars[valSize] || {})[op] || {})[label] || {})[context.dataIndex];"
-                       + "\n                  const _herr = (_hsd != null && _hsd > 0) ? ` ±${formatVal(_hsd)} (n=3)` : '';"),
-            html, count=1)
-        if n_tip == 0:
-            print("warning: template lacks tooltip formatVal -- headline SD not shown in tooltips")
+            old_dataset, n_dataset = re.subn(
+                r"(\s+)data: opData\[variantName\],",
+                lambda m: (m.group(0) + "\n" + m.group(1)
+                           + "headlineSd: (((headlineErrorBars[valSize] || {})[op] || {})[variantName] || {}),"),
+                html, count=1)
+            if n_dataset == 0:
+                print("warning: template lacks opData dataset -- headline SD not attached")
+            else:
+                html = old_dataset
+        if "const _hsd =" in html:
+            print("note: template tooltips already show headline SD -- skipping")
         else:
-            html = old_tip
-            n_lbl = html.count(" ${label}: ${fv}/s")
-            html = html.replace(" ${label}: ${fv}/s", " ${label}: ${fv}/s${_herr}")
-            if n_lbl == 0:
-                print("warning: template lacks tooltip label returns -- headline SD not shown in tooltips")
+            old_tip, n_tip = re.subn(
+                r"const fv = formatVal\(v\);",
+                lambda m: (m.group(0)
+                           + "\n                  const _hsd = (((headlineErrorBars[valSize] || {})[op] || {})[label] || {})[context.dataIndex];"
+                           + "\n                  const _herr = (_hsd != null && _hsd > 0) ? ` ±${formatVal(_hsd)} (n=3)` : '';"),
+                html, count=1)
+            if n_tip == 0:
+                print("warning: template lacks tooltip formatVal -- headline SD not shown in tooltips")
+            else:
+                html = old_tip
+                n_lbl = html.count(" ${label}: ${fv}/s")
+                html = html.replace(" ${label}: ${fv}/s", " ${label}: ${fv}/s${_herr}")
+                if n_lbl == 0:
+                    print("warning: template lacks tooltip label returns -- headline SD not shown in tooltips")
 
     # Stacking Variants legend: the currently measured set only.
     stacking_marker = "Stacking Variants"
