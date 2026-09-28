@@ -167,11 +167,16 @@ template <typename ConfigT>
 auto publish_t1_checkpoint(ShardedT1Index<ConfigT> &t1,
                            const std::filesystem::path &t2_path,
                            uint64_t checkpoint_lsn,
-                           uint64_t target) -> std::chrono::nanoseconds {
+                           uint64_t target,
+                           std::chrono::nanoseconds &t1_write_phase) -> std::chrono::nanoseconds {
   using EntrySnapshot = typename ShardedT1Index<ConfigT>::EntrySnapshot;
   auto offset_mapper_fn = [](std::span<EntrySnapshot> /*merged*/) {};
   vmemkv::ShardedT1CheckpointWriter t1_chk_writer(vmemkv::derive_t1_chk_path(t2_path));
-  auto chk_writer_fn = [&](std::span<const EntrySnapshot> merged) { t1_chk_writer.add_shard(merged); };
+  auto chk_writer_fn = [&](std::span<const EntrySnapshot> merged) {
+    const auto write_start = std::chrono::steady_clock::now();
+    t1_chk_writer.add_shard(merged);
+    t1_write_phase += std::chrono::steady_clock::now() - write_start;
+  };
   const auto start = std::chrono::steady_clock::now();
   const auto t1_boundaries = t1.checkpoint_all_shards(offset_mapper_fn, chk_writer_fn);
   const auto elapsed = std::chrono::steady_clock::now() - start;
@@ -220,6 +225,7 @@ void checkpoint_internal(ReorgState &state,
 
   std::chrono::nanoseconds msync_phase{0};
   std::chrono::nanoseconds t1_phase{0};
+  std::chrono::nanoseconds t1_write_phase{0};
   try {
     const vmemkv::T2Memory *mem = t2.get_memory();
     const auto msync_start = std::chrono::steady_clock::now();
@@ -228,7 +234,7 @@ void checkpoint_internal(ReorgState &state,
 
     pre_finish_hook();
 
-    t1_phase = publish_t1_checkpoint(t1, t2_path, checkpoint_lsn, ct.target);
+    t1_phase = publish_t1_checkpoint(t1, t2_path, checkpoint_lsn, ct.target, t1_write_phase);
   } catch (...) {
     // Nothing durable actually happened (base_boundary hasn't advanced yet) -- un-claim the
     // range so in-place updates aren't blocked forever for a cycle that never published.
@@ -251,6 +257,9 @@ void checkpoint_internal(ReorgState &state,
   timings.last_checkpoint_duration_us = to_us(std::chrono::steady_clock::now() - fn_start);
   timings.last_checkpoint_msync_duration_us = to_us(msync_phase);
   timings.last_checkpoint_t1_reorganize_duration_us = to_us(t1_phase);
+  timings.last_checkpoint_t1_write_duration_us = to_us(t1_write_phase);
+  timings.last_checkpoint_t1_merge_duration_us =
+      to_us(t1_phase > t1_write_phase ? t1_phase - t1_write_phase : std::chrono::nanoseconds{0});
   timings.last_checkpoint_stop_writers_duration_us = to_us(stop_phase);
   timings.last_checkpoint_barrier_drain_duration_us = to_us(barrier_phase);
   timings.last_checkpoint_wal_rotate_duration_us = to_us(rotate_phase);

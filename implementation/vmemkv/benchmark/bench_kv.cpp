@@ -2176,11 +2176,15 @@ constexpr std::size_t kBackgroundJobProbeKeyCount = 10'000'000;
   // whichever of the 3 measure_workload_degradation() calls above most recently ran checkpoint(),
   // representative since corpus size barely changes call to call.
   std::optional<double> t1_reorganize_ms;
+  std::optional<double> t1_merge_ms;
+  std::optional<double> t1_write_ms;
   std::optional<double> wal_rotate_ms;
   std::optional<double> msync_ms;
   if (!any_timed_out && args.job == "checkpoint") {
     const auto stats = store->get_statistics();
     t1_reorganize_ms = stats.last_checkpoint_t1_reorganize_duration_us / 1000.0;
+    t1_merge_ms = stats.last_checkpoint_t1_merge_duration_us / 1000.0;
+    t1_write_ms = stats.last_checkpoint_t1_write_duration_us / 1000.0;
     wal_rotate_ms = stats.last_checkpoint_wal_rotate_duration_us / 1000.0;
     msync_ms = stats.last_checkpoint_msync_duration_us / 1000.0;
   }
@@ -2191,6 +2195,8 @@ constexpr std::size_t kBackgroundJobProbeKeyCount = 10'000'000;
             << "\"update_degradation_pct\":" << pct_json(update_pct) << ","
             << "\"scan_degradation_pct\":" << pct_json(scan_pct) << ","
             << "\"t1_reorganize_phase_ms\":" << pct_json(t1_reorganize_ms) << ","
+            << "\"t1_merge_phase_ms\":" << pct_json(t1_merge_ms) << ","
+            << "\"t1_write_phase_ms\":" << pct_json(t1_write_ms) << ","
             << "\"wal_rotate_phase_ms\":" << pct_json(wal_rotate_ms) << ","
             << "\"msync_phase_ms\":" << pct_json(msync_ms) << ","
             << "\"timed_out\":" << (any_timed_out ? "true" : "false") << "}" << std::endl;
