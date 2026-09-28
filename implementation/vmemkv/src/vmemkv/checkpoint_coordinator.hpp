@@ -17,7 +17,6 @@
 #include <cstdint>
 #include <cstdlib>
 #include <filesystem>
-#include <optional>
 #include <span>
 #include <stdexcept>
 #include <system_error>
@@ -169,69 +168,20 @@ auto publish_t1_checkpoint(ShardedT1Index<ConfigT> &t1,
                            const std::filesystem::path &t2_path,
                            uint64_t checkpoint_lsn,
                            uint64_t target,
-                           std::chrono::nanoseconds &t1_write_phase,
-                           uint64_t &shards_reused,
-                           uint64_t &shard_count) -> std::chrono::nanoseconds {
+                           std::chrono::nanoseconds &t1_write_phase) -> std::chrono::nanoseconds {
   using EntrySnapshot = typename ShardedT1Index<ConfigT>::EntrySnapshot;
   auto offset_mapper_fn = [](std::span<EntrySnapshot> /*merged*/) {};
   vmemkv::ShardedT1CheckpointWriter t1_chk_writer(vmemkv::derive_t1_chk_path(t2_path));
-
-  // Previous committed file, if readable: slots unchanged since their last completed publish
-  // have their sections copied from it verbatim instead of remerging and rewriting them (see
-  // ShardSlot::mutated_version). Missing/corrupt falls back to a full rewrite -- the previous
-  // behavior exactly, so a first checkpoint or a removed file heals the same way. Sections
-  // are trusted by index: this path is the file's sole writer (temp+rename), so indices
-  // recorded at the last completed publish still address it.
-  std::optional<vmemkv::ShardedT1CheckpointFile> prev_file;
-  try {
-    prev_file.emplace(vmemkv::derive_t1_chk_path(t2_path));
-  } catch (...) {
-    prev_file.reset();
-  }
-  const bool have_prev = prev_file.has_value();
-  const uint64_t cycle = t1.completed_publish_cycle() + 1;
-
-  uint64_t section_index = 0;
-  auto claim_slot = [&](auto *slot) {
-    // Version-claim step of the selective-publish protocol: records the pre-merge version
-    // and this cycle, which must precede the merge (a post-merge re-read could claim a
-    // concurrent put's bump before its content is captured; recording a stale version only
-    // costs a rewrite). Claims from a cycle whose manifest never commits stay stale --
-    // published_cycle != completed reads dirty -- so failure needs no cleanup pass.
-    const uint64_t observed = slot->mutated_version.load(std::memory_order_acquire);
-    if (!have_prev || observed != slot->published_version || slot->published_cycle != cycle - 1) {
-      slot->published_version = observed;
-      slot->published_cycle = cycle;
-      return true;
-    }
-    return false;
-  };
-  auto chk_writer_fn = [&](auto *slot, std::span<const EntrySnapshot> merged) {
+  auto chk_writer_fn = [&](std::span<const EntrySnapshot> merged) {
     const auto write_start = std::chrono::steady_clock::now();
     t1_chk_writer.add_shard(merged);
     t1_write_phase += std::chrono::steady_clock::now() - write_start;
-    slot->last_published_section = section_index++;
-  };
-  auto copy_skipped_fn = [&](auto *slot) {
-    const size_t prev_index = slot->last_published_section;
-    if (prev_index >= prev_file->shard_count()) {
-      throw std::runtime_error("t1 checkpoint copy: previous section index out of range");
-    }
-    const auto copy_start = std::chrono::steady_clock::now();
-    t1_chk_writer.copy_shard(prev_file->shard_entries(prev_index));
-    t1_write_phase += std::chrono::steady_clock::now() - copy_start;
-    slot->last_published_section = section_index++;
-    ++shards_reused;
   };
   const auto start = std::chrono::steady_clock::now();
-  const auto t1_boundaries = t1.checkpoint_all_shards(offset_mapper_fn, chk_writer_fn, claim_slot, copy_skipped_fn);
+  const auto t1_boundaries = t1.checkpoint_all_shards(offset_mapper_fn, chk_writer_fn);
   const auto elapsed = std::chrono::steady_clock::now() - start;
   t1_chk_writer.finish(t1_boundaries);
   vmemkv::write_manifest(vmemkv::derive_manifest_path(t2_path), checkpoint_lsn, target);
-  // Cycle completes here, with the manifest: claims recorded above become valid for reuse.
-  // (WAL rotate below is covered by that same manifest by construction.)
-  t1.note_publish_completed();
-  shard_count = section_index;
   return elapsed;
 }
 
@@ -276,8 +226,6 @@ void checkpoint_internal(ReorgState &state,
   std::chrono::nanoseconds msync_phase{0};
   std::chrono::nanoseconds t1_phase{0};
   std::chrono::nanoseconds t1_write_phase{0};
-  uint64_t shards_reused = 0;
-  uint64_t shard_count = 0;
   try {
     const vmemkv::T2Memory *mem = t2.get_memory();
     const auto msync_start = std::chrono::steady_clock::now();
@@ -286,13 +234,10 @@ void checkpoint_internal(ReorgState &state,
 
     pre_finish_hook();
 
-    t1_phase =
-        publish_t1_checkpoint(t1, t2_path, checkpoint_lsn, ct.target, t1_write_phase, shards_reused, shard_count);
+    t1_phase = publish_t1_checkpoint(t1, t2_path, checkpoint_lsn, ct.target, t1_write_phase);
   } catch (...) {
     // Nothing durable actually happened (base_boundary hasn't advanced yet) -- un-claim the
     // range so in-place updates aren't blocked forever for a cycle that never published.
-    // Version claims recorded mid-loop need no repair: their cycle never completes, so they
-    // read stale next time and every touched slot is rewritten (see ShardSlot::mutated_version).
     own.revert_watermark(ct.old_base_boundary);
     throw;
   }
@@ -315,8 +260,6 @@ void checkpoint_internal(ReorgState &state,
   timings.last_checkpoint_t1_write_duration_us = to_us(t1_write_phase);
   timings.last_checkpoint_t1_merge_duration_us =
       to_us(t1_phase > t1_write_phase ? t1_phase - t1_write_phase : std::chrono::nanoseconds{0});
-  timings.last_checkpoint_t1_shards_reused = shards_reused;
-  timings.last_checkpoint_t1_shard_count = shard_count;
   timings.last_checkpoint_stop_writers_duration_us = to_us(stop_phase);
   timings.last_checkpoint_barrier_drain_duration_us = to_us(barrier_phase);
   timings.last_checkpoint_wal_rotate_duration_us = to_us(rotate_phase);

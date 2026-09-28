@@ -318,9 +318,7 @@ entry 単位でインライン化されている entry(2.1.1 節、7.2 節)は T
    前サイクルとの重複再 sync は冪等として許容する。
 6. シャードごとに `checkpoint_all_shards()` で `append_region` を `sorted_region` へ統合し
    (空 append は sorted dump の shortcut、split 中は pause+retry)、T1 checkpoint ファイルを
-   書き出す(temp + `rename`、5.4 節)。前回公開後に変更のないシャードは旧ファイルの
-   section を複写し、マージ・再書き込みを省く(版追跡は `mutated_version`)。
-   `payload_bits` を書き換えない恒等写像を渡す。
+   書き出す(temp + `rename`、5.4 節)。`payload_bits` を書き換えない恒等写像を渡す。
 7. manifest に `checkpoint_lsn` と `target` を書く(5.3 節)。
 8. `base_boundary` を `target` へアトミックに前進させる。
 9. `Wal::rotate_segment()` を呼ぶ(5.5 節)。引数なし。世代連番の切替えのみであり、`checkpoint_lsn` を渡さない。

@@ -108,11 +108,6 @@ class ShardedT1CheckpointWriter {
   // and renames the temp file atomically onto the final path.
   void finish(std::span<const T1ChkKeyPrefix> boundaries);
 
-  // Copies one already-serialized section (e.g. a clean shard's span from the previous
-  // committed file) verbatim: same count-then-entries bytes, same checksum folding, same
-  // counters as add_shard(). Call in the same ascending position the section occupies.
-  void copy_shard(std::span<const T1ChkEntry> entries) { add_shard_entries(entries.data(), entries.size()); }
-
  private:
   void add_shard_entries(const T1ChkEntry *entries, size_t entry_count);
 

@@ -143,8 +143,6 @@ using System_AllOn = Config<BloomFilter, T1InlineValue>;
   X(last_checkpoint_t1_reorganize_duration_us) \
   X(last_checkpoint_t1_merge_duration_us)      \
   X(last_checkpoint_t1_write_duration_us)      \
-  X(last_checkpoint_t1_shards_reused)          \
-  X(last_checkpoint_t1_shard_count)            \
   X(last_checkpoint_stop_writers_duration_us)  \
   X(last_checkpoint_barrier_drain_duration_us) \
   X(last_checkpoint_wal_rotate_duration_us)    \
@@ -178,8 +176,7 @@ struct VMemKVStatistics {
   // msync()'d delta. corpus_bytes: target, the total T2 footprint as of this cycle.
   // t1_merge/t1_write split t1_reorganize into per-shard merge CPU (plus the merge-free dump
   // walk for clean shards) and checkpoint-file convert+write; t1_reorganize - t1_write == t1_merge
-  // up to loop overhead. t1_shards_reused/t1_shard_count: sections copied from the previous file
-  // vs total published (incremental-publish observability).
+  // up to loop overhead.
   VMEMKV_CHECKPOINT_STATS_FIELDS(VMEMKV_DECLARE_STAT_FIELD)
 
   // Cumulative wall-clock time, summed across all explicit reorganize()/checkpoint() callers,
