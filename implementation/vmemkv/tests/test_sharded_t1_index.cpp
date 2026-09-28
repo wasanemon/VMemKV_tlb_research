@@ -410,8 +410,12 @@ TEST_CASE("ShardedT1Index: cycling updates under tiny shards keep every key at i
       }
     });
   }
+  // Uncapped: a fast thread burns through a fixed attempt budget before writers insert
+  // enough keys to split, exiting before any split is possible. Attempts spanning the whole
+  // write phase guarantee one lands after keys exist (a win then always splits, since aborts
+  // need fewer than kMinSplitEntries live entries).
   std::thread splitter([&] {
-    for (int round = 0; round < 2000 && !stop.load(std::memory_order_relaxed); ++round) {
+    for (int round = 0; !stop.load(std::memory_order_relaxed); ++round) {
       idx->split_shard_containing(to_span(ikey((round * 37) % kKeyRange)));
     }
   });
