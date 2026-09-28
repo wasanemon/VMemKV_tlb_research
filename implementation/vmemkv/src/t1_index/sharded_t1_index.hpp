@@ -132,6 +132,10 @@ class ShardedT1Index {
           backoff.wait();
           continue;
         }
+        // Every applied put (insert/update/delete-tombstone, in-place or appended) mutates
+        // this slot's content; over-marking a slot retired right after costs one rewrite.
+        // Release: pairs with publish's acquire load, so a visible bump implies visible content.
+        slot->mutated_version.fetch_add(1, std::memory_order_release);
         if (slot->superseded.load(std::memory_order_acquire) != nullptr) {
           continue;
         }
@@ -226,6 +230,18 @@ class ShardedT1Index {
   [[nodiscard]] auto last_split_pause_us() const -> uint64_t {
     return last_split_pause_us_.load(std::memory_order_relaxed);
   }
+
+  // Marks the publish cycle that just committed its manifest as completed, validating every
+  // version claim it recorded (see ShardSlot::mutated_version). Called once per checkpoint
+  // cycle, after write_manifest(), by the single-flight publish path only -- never by the
+  // T1-only path (which publishes no file, so its merges must not validate anything) and
+  // never concurrently. A cycle that throws before its manifest leaves this untouched, so
+  // its claims read stale next time and every touched slot is rewritten.
+  void note_publish_completed() noexcept { ++completed_publish_cycle_; }
+
+  // The cycle completions above count. Read by the publish path's claim step (same thread,
+  // same single-flight discipline), so plain.
+  [[nodiscard]] auto completed_publish_cycle() const noexcept -> uint64_t { return completed_publish_cycle_; }
 
   // steady_clock::now().time_since_epoch().count() at the end of that same pause (see
   // last_split_pause_us()) -- lets a caller running in the same process (any std::chrono::
@@ -324,8 +340,29 @@ class ShardedT1Index {
   // without ever invoking its chk_writer callback at all, which would silently make this method
   // skip that shard's data entirely if not retried; reorganize_until_captured() below is what
   // retries each shard's call until its callback actually fires.
+  //
+  // The 4-argument overload adds selective publish for incremental checkpoints.
+  // claim_for_publish() runs per slot before any merge/dump work: it returns false to skip
+  // the slot (on_publish_skipped() runs in its place, same ascending order -- e.g. copying
+  // the slot's section from the previous checkpoint file), or true to merge/dump and publish
+  // it through per_shard_writer(slot, merged). Claiming doubles as the version snapshot for
+  // incremental publish (see ShardSlot::mutated_version): it must precede the merge, and
+  // per_shard_writer receives the slot so the caller can record where each section landed.
+  // Skipped slots keep their content out of per_shard_writer entirely (no offset_mapper call
+  // either).
   template <typename OffsetMapper, typename PerShardWriter>
   auto checkpoint_all_shards(OffsetMapper offset_mapper, PerShardWriter per_shard_writer) -> std::vector<Key> {
+    return checkpoint_all_shards(
+        offset_mapper,
+        [&](ShardSlot * /*slot*/, std::span<const EntrySnapshot> merged) { per_shard_writer(merged); },
+        [](ShardSlot *) { return true; },
+        [](ShardSlot *) {});
+  }
+  template <typename OffsetMapper, typename PerShardWriter, typename ClaimForPublish, typename OnPublishSkipped>
+  auto checkpoint_all_shards(OffsetMapper offset_mapper,
+                             PerShardWriter per_shard_writer,
+                             ClaimForPublish claim_for_publish,
+                             OnPublishSkipped on_publish_skipped) -> std::vector<Key> {
     FlagGuard pause(splits_paused_);
 
     std::vector<ShardSlot *> snapshot;
@@ -349,6 +386,10 @@ class ShardedT1Index {
 
     std::vector<EntrySnapshot> dumped;
     for (ShardSlot *slot : snapshot) {
+      if (!claim_for_publish(slot)) {
+        on_publish_skipped(slot);
+        continue;
+      }
       // Merge-free shortcut for shards with nothing new to merge: with an empty append
       // region, a merge's output is this shard's sorted region as-is (same key order, same
       // tombstone-skipping), so serializing it directly yields byte-identical checkpoint
@@ -361,10 +402,14 @@ class ShardedT1Index {
       if (slot->index->append_size() == 0) {
         slot->index->dump_sorted_region(dumped);
         offset_mapper(std::span<EntrySnapshot>(dumped));
-        per_shard_writer(dumped);
+        per_shard_writer(slot, std::span<const EntrySnapshot>(dumped));
         continue;
       }
-      reorganize_until_captured(*slot->index, offset_mapper, per_shard_writer, /*parallel_sort=*/false);
+      reorganize_until_captured(
+          *slot->index,
+          offset_mapper,
+          [&](std::span<const EntrySnapshot> merged) { per_shard_writer(slot, merged); },
+          /*parallel_sort=*/false);
       slot->tombstones_since_maintenance.store(0, std::memory_order_relaxed);
     }
     return boundaries;
@@ -383,10 +428,16 @@ class ShardedT1Index {
     auto *new_dir = new Directory();
     new_dir->boundaries.assign(boundaries.begin(), boundaries.end());
     new_dir->shards.reserve(per_shard_entries.size());
-    for (const auto &entries : per_shard_entries) {
+    for (size_t shard_index = 0; shard_index < per_shard_entries.size(); ++shard_index) {
       auto shard = std::make_unique<Shard>(append_cap_);
-      shard->load_sorted_region_from_checkpoint(entries);
-      new_dir->shards.push_back(new ShardSlot(std::move(shard)));
+      shard->load_sorted_region_from_checkpoint(per_shard_entries[shard_index]);
+      auto *slot = new ShardSlot(std::move(shard));
+      // Loaded content is byte-identical to the file's section at this index, so a checkpoint
+      // with no intervening writes reuses every section instead of rewriting the file.
+      slot->mutated_version.store(0, std::memory_order_relaxed);
+      slot->published_version = 0;
+      slot->last_published_section = shard_index;
+      new_dir->shards.push_back(slot);
     }
 
     Directory *old_dir = directory_.load(std::memory_order_relaxed);
@@ -418,6 +469,31 @@ class ShardedT1Index {
     // null: normal. kClosingSentinel: split/merge in progress, S1/S2 not yet decided (put/remove
     // must wait; get/scan may still read `index` directly). Anything else: a real Split*, redirect.
     mutable std::atomic<Split *> superseded{nullptr};
+    // Mutation version for incremental checkpoints: bumped on every applied put/remove
+    // landing in this slot (release, after the mutation itself), read by the single-flight
+    // publish path (acquire) before merging. A slot whose version matches its published_version
+    // (recorded by a completed cycle) cannot have changed since -- any newer mutation's bump
+    // is either visible (and then its content was visible to the merge too) or invisible
+    // (forcing a republish next cycle) -- so its previous file section is reused instead of
+    // remerging and rewriting it. Merges outside publish (background maintenance, explicit
+    // T1-only reorganize) need no bump: they preserve logical content, and anything concurrent
+    // stays WAL-covered past the cycle's checkpoint_lsn (see checkpoint_all_shards()'s own
+    // dump-shortcut comment). Starts at 1 against published_version 0: a slot with no
+    // published section yet (fresh, post-split) must be written, never copied.
+    std::atomic<uint64_t> mutated_version{1};
+    // Version (and file section index and cycle below) of this slot's content as last claimed
+    // for publish. Written and read only by the single-flight publish path, so plain (never
+    // touched by background workers or the write path). Must be the version read *before*
+    // merging, never re-read after: a concurrent put's bump must not be claimed before its
+    // content is captured. A claim from a cycle that never completed (publish threw before
+    // its manifest committed) is self-invalidating: published_cycle != completed cycle reads
+    // dirty, so no failure cleanup pass is needed anywhere.
+    uint64_t published_version = 0;
+    uint64_t published_cycle = 0;
+    // This slot's section index in the most recently published checkpoint file. Written and
+    // read only by the single-flight publish path, so plain (never touched by background
+    // workers or the write path).
+    size_t last_published_section = 0;
     // Dedups queue entries: only one outstanding maintenance request per shard at a time. Cleared
     // at the *start* of run_maintenance() (see its own comment), not after -- a fresh soft-
     // threshold trip during that run re-enqueues rather than being silently dropped.
@@ -899,6 +975,9 @@ class ShardedT1Index {
   // (see that method's own comment). Checked only at the point a split would actually be
   // initiated (winning the Closing CAS); already in-flight splits are unaffected.
   std::atomic<bool> splits_paused_{false};
+  // Count of publish cycles whose manifest committed (see note_publish_completed()).
+  // Single-flight publish discipline only, so plain.
+  uint64_t completed_publish_cycle_ = 0;
 };
 
 template <typename Config>
