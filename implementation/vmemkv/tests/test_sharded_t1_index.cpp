@@ -291,21 +291,19 @@ TEST_CASE("ShardedT1Index: a split under concurrent writes loses no straggler en
     writer.join();
   }
 
-  // Background maintenance workers are internal jthreads this test never joins directly -- wait
-  // for shard_count() to stop changing, then give any in-flight split a generous fixed window to
-  // finish.
-  size_t settled_shard_count = 0;
-  for (int round = 0; round < 300; ++round) {
+  // Background maintenance workers are internal jthreads this test never joins directly --
+  // wait for split progress (not stability: on a loaded machine the first split can take a
+  // while to start, and a stable count of 1 only means nothing started yet), then give any
+  // in-flight split a generous fixed window to finish. The timeout still fails a genuinely
+  // broken splitter below.
+  size_t current = idx->shard_count();
+  for (int round = 0; round < 300 && current <= 1; ++round) {
     std::this_thread::sleep_for(std::chrono::milliseconds(20));
-    const size_t current = idx->shard_count();
-    if (current == settled_shard_count) {
-      break;
-    }
-    settled_shard_count = current;
+    current = idx->shard_count();
   }
   std::this_thread::sleep_for(std::chrono::milliseconds(200));
 
-  CHECK(idx->shard_count() > 1);
+  CHECK(current > 1);
   for (int i = 0; i < kKeyCount; ++i) {
     CHECK(idx->get(to_span(ikey(i))) == static_cast<uint64_t>(i));
   }
@@ -424,18 +422,16 @@ TEST_CASE("ShardedT1Index: cycling updates under tiny shards keep every key at i
   stop.store(true, std::memory_order_relaxed);
   splitter.join();
 
-  size_t settled_shard_count = 0;
-  for (int round = 0; round < 300; ++round) {
+  size_t current = idx->shard_count();
+  // Wait for progress, not stability (see the straggler test above): the timeout still fails
+  // a genuinely broken splitter below.
+  for (int round = 0; round < 300 && current <= 1; ++round) {
     std::this_thread::sleep_for(std::chrono::milliseconds(20));
-    const size_t current = idx->shard_count();
-    if (current == settled_shard_count) {
-      break;
-    }
-    settled_shard_count = current;
+    current = idx->shard_count();
   }
   std::this_thread::sleep_for(std::chrono::milliseconds(200));
 
-  CHECK(idx->shard_count() > 1);
+  CHECK(current > 1);
   for (int i = 0; i < kKeyRange; ++i) {
     CHECK(idx->get(to_span(ikey(i))) == static_cast<uint64_t>(kRounds - 1));
   }
